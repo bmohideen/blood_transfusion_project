@@ -61,3 +61,17 @@ data <- data_orig %>%
        tot_24_rbc = "Total 24hr RBC",
        massive_transfusion = "Massive Transfusion"
        )
+
+# Select the relevant data
+data_use <- data %>%
+  select(study_id, tx_db_id, or_date, gender_male, aat_deficiency, cys_fib, ipah, 
+         ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud, renal_fail, stroke, 
+         liver_disease, thyroid_disease, first_transplant, redo_transplant, evlp, preop_ecls,
+         las, Pre_Hb, Pre_Hct, Pre_Platelets, Pre_PT, Pre_INR, Pre_PTT, Pre_Fibrinogen, Pre_Creatinine,
+         intraop_ecls, ECLS_ECMO, ECLS_CPB, intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
+         icu_stay, DEATH_DATE, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
+         rbc_0_24, rbc_24_48, rbc_48_72, rbc_72_tot, ffp_0_24, ffp_24_48, ffp_48_72, ffp_72_tot,
+         plt_0_24, plt_24_48, plt_48_72, plt_72_tot, cryo_0_24, cryo_24_48, cryo_48_72, cryo_72_tot,
+         tot_24_rbc, massive_transfusion)
+
+
