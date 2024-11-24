@@ -4,6 +4,11 @@
 library(readxl)
 library(dplyr)
 
+#########################################
+##### Loading and Cleaning the Data #####
+#########################################
+
+
 # load original data
 data_orig <- read_excel("transfusiondata.xlsx")
 
@@ -73,5 +78,35 @@ data_use <- data %>%
          rbc_0_24, rbc_24_48, rbc_48_72, rbc_72_tot, ffp_0_24, ffp_24_48, ffp_48_72, ffp_72_tot,
          plt_0_24, plt_24_48, plt_48_72, plt_72_tot, cryo_0_24, cryo_24_48, cryo_48_72, cryo_72_tot,
          tot_24_rbc, massive_transfusion)
+
+# structure
+str(data_use)
+
+
+
+# Converting to Proper Binary structure (TRUE/Y = 1, FALSE/N = 0) 
+
+# Identify columns with binary "TRUE"/"FALSE" values stored as character
+binary_chr_cols <- sapply(data_use, function(col) all(col %in% c("TRUE", "FALSE")))
+
+# Convert these columns to numeric (0/1)
+data_use[, binary_chr_cols] <- lapply(data_use[, binary_chr_cols], function(col) as.numeric(col == "TRUE"))
+
+
+
+# Identify columns with "Y"/"N" values stored as character
+yn_cols <- sapply(data_use, function(col) all(col %in% c("Y", "N", NA)))
+
+# Convert into numeric binary (1 for "Y", 0 for "N")
+data_use[, yn_cols] <- lapply(data_use[, yn_cols], function(col) as.numeric(col == "Y"))
+
+# Check the structure of the updated dataset
+str(data_use)
+
+# Check the summary of the updated dataset
+summary(data_use)
+
+
+
 
 
