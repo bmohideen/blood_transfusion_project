@@ -1,9 +1,18 @@
+
+
+# Install required packages
 library(readxl)
 library(dplyr)
-data <- read_excel("transfusion data.xlsx")
-data <- data %>% 
+
+# load original data
+data_orig <- read_excel("transfusiondata.xlsx")
+
+# rename data 
+data <- data_orig %>% 
   rename(
        study_id = "STUDY ID #",
+       tx_db_id = "TX DB ID", 
+       or_date = "OR Date", 
        gender_male = "Gender (male)",
        aat_deficiency = "alpha1-Antitrypsin Deficiency",
        cys_fib = "Cystic Fibrosis",
@@ -19,12 +28,19 @@ data <- data %>%
        liver_disease = "Liver Disease",
        thyroid_disease = "Thyroid Disease",
        first_transplant = "First Lung Transplant",
+       redo_transplant = "Redo Lung Transplant", 
+       dcd_dbd = "DCD vs DBD"
        evlp = "ExVIVO Lung Perfusion",
        preop_ecls = "Preoperative ECLS",
-       las = "Las score",
+       las = "LAS score",
        intraop_ecls = "Intraoperative ECLS",
+       protamine_yes = "Protamine (Y=1 N=0)", 
+       intra_albumin_5perc_mL = "Intra_Albumin 5% (ml)", 
+       intra_crystalloid_ml = "Intra_Crystalloid (ml)",
+       intra_cell_saver_returned_ml = "Intra_Cell Saver returned (ml)"
        intra_plasma = "Intra_Fresh Frozen Plasma",
        intra_packed_cells = "Intra_Packed Cells",
+       intra_PCC_octaplex = "Intra_PCC/Octaplex"
        icu_stay = "Duration of ICU Stay (days)",
        rbc_0_24 = "RBC 0-24hrs",
        rbc_24_48 = "RBC 24-48hrs",
