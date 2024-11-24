@@ -29,18 +29,18 @@ data <- data_orig %>%
        thyroid_disease = "Thyroid Disease",
        first_transplant = "First Lung Transplant",
        redo_transplant = "Redo Lung Transplant", 
-       dcd_dbd = "DCD vs DBD"
+       dcd_dbd = "DCD vs DBD",
        evlp = "ExVIVO Lung Perfusion",
        preop_ecls = "Preoperative ECLS",
        las = "LAS score",
        intraop_ecls = "Intraoperative ECLS",
        protamine_yes = "Protamine (Y=1 N=0)", 
-       intra_albumin_5perc_mL = "Intra_Albumin 5% (ml)", 
-       intra_crystalloid_ml = "Intra_Crystalloid (ml)",
-       intra_cell_saver_returned_ml = "Intra_Cell Saver returned (ml)"
+       intra_albumin_5perc_mL = "Intra_Albumin 5% (mL)", 
+       intra_crystalloid_ml = "Intra_Crystalloid (mL)",
+       intra_cell_saver_returned_ml = "Intra_Cell Saver returned (mL)",
        intra_plasma = "Intra_Fresh Frozen Plasma",
        intra_packed_cells = "Intra_Packed Cells",
-       intra_PCC_octaplex = "Intra_PCC/Octaplex"
+       intra_PCC_octaplex = "Intra_PCC/Octaplex",
        icu_stay = "Duration of ICU Stay (days)",
        rbc_0_24 = "RBC 0-24hrs",
        rbc_24_48 = "RBC 24-48hrs",
