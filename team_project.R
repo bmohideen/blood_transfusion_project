@@ -3,6 +3,7 @@
 # Install required packages
 library(readxl)
 library(dplyr)
+library(tableone)
 
 #########################################
 ##### Loading and Cleaning the Data #####
@@ -83,7 +84,6 @@ data_use <- data %>%
 str(data_use)
 
 
-
 # Converting to Proper Binary structure (TRUE/Y = 1, FALSE/N = 0) 
 
 # Identify columns with binary "TRUE"/"FALSE" values stored as character
@@ -105,6 +105,34 @@ str(data_use)
 
 # Check the summary of the updated dataset
 summary(data_use)
+
+
+#########################################
+##### Loading and Cleaning the Data #####
+#########################################
+
+# Specify the categorical variables
+categorical_vars <- c("gender_male", "aat_deficiency", "cys_fib", "ipah", "ild", "pulm_other",
+                      "cad", "Hypertension", "t1d", "t2d", "gerd_pud", "renal_fail", "stroke",
+                      "liver_disease", "thyroid_disease", "first_transplant", "redo_transplant",
+                      "evlp", "preop_ecls", "intraop_ecls", "ECLS_ECMO", "ECLS_CPB", "ALIVE_30DAYS_YN",
+                      "ALIVE_90DAYS_YN", "ALIVE_12MTHS_YN", "massive_transfusion")
+
+# Specify the conitnous variables
+continuous_vars <- c("las", "Pre_Hb", "Pre_Hct", "Pre_Platelets", "Pre_PT", "Pre_INR",
+                     "Pre_PTT", "Pre_Fibrinogen", "Pre_Creatinine", "intra_plasma",
+                     "intra_packed_cells", "Intra_Platelets", "Intra_Cryoprecipitate",
+                     "icu_stay", "ICU_LOS", "HOSPITAL_LOS", "rbc_72_tot", "ffp_72_tot",
+                     "plt_72_tot", "cryo_72_tot", "tot_24_rbc")
+
+# Create a vector for all the variables in the dataset
+all_vars <- c(categorical_vars, continuous_vars)
+
+# Create a table of the summary statistics using the TableOne package
+table_one <- CreateTableOne(vars = all_vars, data = data_use, factorVars = categorical_vars)
+
+# View the summary statistics
+summary(table_one, digits =2)
 
 
 
