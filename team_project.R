@@ -106,6 +106,13 @@ str(data_use)
 # Check the summary of the updated dataset
 summary(data_use)
 
+# number of observations
+nrow(data_use)
+# 192
+
+# number of variables
+ncol(data_use)
+# 63
 
 #####################################
 ##### Exploratory Data Analysis #####
@@ -133,6 +140,27 @@ table_one <- CreateTableOne(vars = all_vars, data = data_use, factorVars = categ
 
 # View the summary statistics
 summary(table_one, digits =2)
+
+###### Prepare the tables so that they look pretty for the report #####
+# Install gridExtra
+library(gridExtra)
+
+# get categorical table 
+# quote = F removes quotes around the text
+# noSpaces = T removes spaces
+# printToggle = F makes the output not be printed
+cat_table2 <- print(table_one$CatTable, quote = FALSE, noSpaces = TRUE, printToggle = FALSE)
+# save as pdf
+pdf("cat_table2.pdf", width = 10, height = 8)
+grid.table(cat_table2) # proper format for saving 
+dev.off() # closes PDF
+
+# repreat for continous
+num_table2 <- print(table_one$ContTable, quote = FALSE, noSpaces = TRUE, printToggle = FALSE)
+## Save to a CSV file
+pdf("num_table2.pdf", width = 10, height = 8)
+grid.table(num_table2)
+dev.off()
 
 # Boxplot of catogrical variables
 
