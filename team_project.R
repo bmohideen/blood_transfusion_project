@@ -374,28 +374,39 @@ ggplot(data_use, aes(x = HOSPITAL_LOS)) +
 
 ### Flag! Study ID #51
 
-# Plotting a histogram for Total RBC Unit Tranfused 72 hrs Post Surgery
+# Plotting a histogram for Total RBC Unit Transfused 72 hrs Post Surgery
 ggplot(data_use, aes(x = rbc_72_tot)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Total RBC Unit Tranfused 72 hrs Post Surgery", x = "Total RBC Unit Tranfused", y = "Frequency")
 
-# Plotting a histogram for Total Fresh Frozen Plasma Unit Tranfused 72 hrs Post Surgery
+# Plotting a histogram for Total Fresh Frozen Plasma Unit Transfused 72 hrs Post Surgery
 ggplot(data_use, aes(x = ffp_72_tot)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Total Fresh Frozen Plasma Unit Tranfused 72 hrs Post Surgery", x = "Total Fresh Frozen Plasma Unit Tranfused", y = "Frequency")
 
-# Plotting a histogram for Total Platelets Tranfused 72 hrs Post Surgery
+# Plotting a histogram for Total Platelets Transfused 72 hrs Post Surgery
 ggplot(data_use, aes(x = plt_72_tot)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Total Platelets Tranfused 72 hrs Post Surgery", x = "Total Platelets Tranfused", y = "Frequency")
 
-# Plotting a histogram for Total Cryoprecipitate Unit Tranfused 72 hrs Post Surgery
+# Plotting a histogram for Total Cryoprecipitate Unit Transfused 72 hrs Post Surgery
 ggplot(data_use, aes(x = cryo_72_tot)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Total Cryoprecipitate Unit Tranfused 72 hrs Post Surgery", x = "Total Cryoprecipitate Unit Tranfused", y = "Frequency")
 
-# Plotting a histogram for Total RBC Unit Tranfused during the first 24 Hr of surgery (including intraop and post op)
+# Plotting a histogram for Total RBC Unit Transfused during the first 24 Hr of surgery (including intraop and post op)
 ggplot(data_use, aes(x = tot_24_rbc)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Total RBC Unit Tranfused in the First 24 hrs of Surgery", x = "Total RBC Unit Tranfused", y = "Frequency")
 
+####################################
+#####     Lasso Regression     #####
+####################################
+
+# Create a column for transfusion indicator
+data_use1 <- data_use %>%
+  mutate(
+    transfusion = if_else(
+      rowSums(across(c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate))) == 0, 0, 1
+    )
+  )
