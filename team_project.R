@@ -107,9 +107,9 @@ str(data_use)
 summary(data_use)
 
 
-#########################################
-##### Loading and Cleaning the Data #####
-#########################################
+#####################################
+##### Exploratory Data Analysis #####
+#####################################
 
 # Specify the categorical variables
 categorical_vars <- c("gender_male", "aat_deficiency", "cys_fib", "ipah", "ild", "pulm_other",
@@ -135,6 +135,67 @@ table_one <- CreateTableOne(vars = all_vars, data = data_use, factorVars = categ
 summary(table_one, digits =2)
 
 
+# Boxplot of catogrical variables
 
+# Load necessary libraries
+library(ggplot2)
+
+# Loop through categorical variables
+for (cat_var in categorical_vars) {
+  # Create a bar plot
+  p <- ggplot(data_use, aes_string(x = cat_var)) +
+    geom_bar(fill = "lightblue", color = "black") +
+    labs(
+      title = paste("Frequency Bar Plot of", cat_var),
+      x = cat_var,
+      y = "Frequency"
+    ) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      plot.title = element_text(hjust = 0.5, size = 14)
+    )
+  
+  # Print the plot
+  print(p)
+}
+
+
+# Plots for continuous variables
+
+# Plotting a histogram for las score
+ggplot(data_use, aes(x = las)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of LAS Score", x = "Las Score", y = "Frequency")
+
+# Plotting a histogram for Preoperative Hemoglobin Level
+ggplot(data_use, aes(x = Pre_Hb)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Preoperative Hemoglobin Level", x = "Pre Hb Score", y = "Frequency")
+
+# Plotting a histogram for Preoperative Hematocrit Level
+ggplot(data_use, aes(x = Pre_Hct)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Preoperative Hematocrit Level", x = "Pre Hct Score", y = "Frequency")
+
+# Plotting a histogram for Preoperative Platelets Level
+ggplot(data_use, aes(x = Pre_Platelets)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Preoperative Platelets Level", x = "Pre Platelets Score", y = "Frequency")
+
+# Plotting a histogram for Preoperative Prothrombin Time
+ggplot(data_use, aes(x = Pre_PT)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Preoperative Prothrombin Time", x = "Pre PT Score", y = "Frequency")
+
+# Plotting a histogram for Preoperative international normalized ratio (standardized measure of PT)
+ggplot(data_use, aes(x = Pre_INR)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Preoperative international normalized ratio", x = "Pre INR Score", y = "Frequency")
+
+# Plotting a histogram for Preoperative partial thromboplastin time
+ggplot(data_use, aes(x = Pre_PTT)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Preoperative partial thromboplastin time", x = "Pre PTT Score", y = "Frequency")
 
 
