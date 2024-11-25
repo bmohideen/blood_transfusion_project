@@ -134,34 +134,130 @@ table_one <- CreateTableOne(vars = all_vars, data = data_use, factorVars = categ
 # View the summary statistics
 summary(table_one, digits =2)
 
-
 # Boxplot of catogrical variables
 
 # Load necessary libraries
 library(ggplot2)
 
 # Loop through categorical variables
-for (cat_var in categorical_vars) {
+# for (cat_var in categorical_vars) {
   # Create a bar plot
-  p <- ggplot(data_use, aes_string(x = cat_var)) +
-    geom_bar(fill = "lightblue", color = "black") +
-    labs(
-      title = paste("Frequency Bar Plot of", cat_var),
-      x = cat_var,
-      y = "Frequency"
-    ) +
-    theme_minimal() +
-    theme(
-      axis.text.x = element_text(angle = 45, hjust = 1),
-      plot.title = element_text(hjust = 0.5, size = 14)
-    )
+  # p <- ggplot(data_use, aes_string(x = cat_var)) +
+    # geom_bar(fill = "lightblue", color = "black") +
+    # labs(
+      # title = paste("Frequency Bar Plot of", cat_var),
+      # x = cat_var,
+      # y = "Frequency"
+    # ) +
+    # theme_minimal() +
+    # theme(
+      # axis.text.x = element_text(angle = 45, hjust = 1),
+      # plot.title = element_text(hjust = 0.5, size = 14)
+    # )
   
   # Print the plot
-  print(p)
-}
+  # print(p)
+# }
 
 
-# Plots for continuous variables
+#### Plots for categorical variables ####
+
+# Gender (Male)
+ggplot(data_use, aes(x = factor(gender_male))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Gender (Male)", x = "Gender (Male: 1 = Yes, 0 = No)", y = "Count")
+
+# Alpha-1 antitrypsin deficiency
+ggplot(data_use, aes(x = factor(aat_deficiency))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Alpha-1 Antitrypsin Deficiency", x = "AAT Deficiency (1 = Yes, 0 = No)", y = "Count")
+
+# Cystic fibrosis
+ggplot(data_use, aes(x = factor(cys_fib))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Cystic Fibrosis", x = "Cystic Fibrosis (1 = Yes, 0 = No)", y = "Count")
+
+# Idiopathic pulmonary arterial hypertension (IPAH)
+ggplot(data_use, aes(x = factor(ipah))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Idiopathic Pulmonary Arterial Hypertension (IPAH)", x = "IPAH (1 = Yes, 0 = No)", y = "Count")
+
+# Interstitial lung disease (ILD)
+ggplot(data_use, aes(x = factor(ild))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Interstitial Lung Disease (ILD)", x = "ILD (1 = Yes, 0 = No)", y = "Count")
+
+# Other pulmonary diseases
+ggplot(data_use, aes(x = factor(pulm_other))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Other Pulmonary Diseases", x = "Other Pulmonary Diseases (1 = Yes, 0 = No)", y = "Count")
+
+# Coronary artery disease (CAD)
+ggplot(data_use, aes(x = factor(cad))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Coronary Artery Disease (CAD)", x = "CAD (1 = Yes, 0 = No)", y = "Count")
+
+# Hypertension
+ggplot(data_use, aes(x = factor(Hypertension))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Hypertension", x = "Hypertension (1 = Yes, 0 = No)", y = "Count")
+
+# Type 1 diabetes (T1D)
+ggplot(data_use, aes(x = factor(t1d))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Type 1 Diabetes (T1D)", x = "T1D (1 = Yes, 0 = No)", y = "Count")
+
+# Type 2 diabetes (T2D)
+ggplot(data_use, aes(x = factor(t2d))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Type 2 Diabetes (T2D)", x = "T2D (1 = Yes, 0 = No)", y = "Count")
+
+# Gastroesophageal reflux disease or peptic ulcer disease (GERD/PUD)
+ggplot(data_use, aes(x = factor(gerd_pud))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of GERD/PUD", x = "GERD/PUD (1 = Yes, 0 = No)", y = "Count")
+
+# Renal failure
+ggplot(data_use, aes(x = factor(renal_fail))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Renal Failure", x = "Renal Failure (1 = Yes, 0 = No)", y = "Count")
+
+# Stroke
+ggplot(data_use, aes(x = factor(stroke))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Stroke", x = "Stroke (1 = Yes, 0 = No)", y = "Count")
+
+# Liver disease
+ggplot(data_use, aes(x = factor(liver_disease))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Liver Disease", x = "Liver Disease (1 = Yes, 0 = No)", y = "Count")
+
+# Thyroid disease
+ggplot(data_use, aes(x = factor(thyroid_disease))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Thyroid Disease", x = "Thyroid Disease (1 = Yes, 0 = No)", y = "Count")
+
+# First transplant
+ggplot(data_use, aes(x = factor(first_transplant))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of First Transplant", x = "First Transplant (1 = Yes, 0 = No)", y = "Count")
+
+# Redo transplant
+ggplot(data_use, aes(x = factor(redo_transplant))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Redo Transplant", x = "Redo Transplant (1 = Yes, 0 = No)", y = "Count")
+
+# Extracorporeal lung support (ECLS)
+ggplot(data_use, aes(x = factor(preop_ecls))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Preoperative Extracorporeal Lung Support (ECLS)", x = "Preoperative ECLS (1 = Yes, 0 = No)", y = "Count")
+
+# Massive transfusion
+ggplot(data_use, aes(x = factor(massive_transfusion))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Massive Transfusion", x = "Massive Transfusion (1 = Yes, 0 = No)", y = "Count")
+
+#### Plots for continuous variables ####
 
 # Plotting a histogram for las score
 ggplot(data_use, aes(x = las)) + 
