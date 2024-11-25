@@ -198,4 +198,80 @@ ggplot(data_use, aes(x = Pre_PTT)) +
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Preoperative partial thromboplastin time", x = "Pre PTT Score", y = "Frequency")
 
+# Plotting a histogram for Preoperative Fibrinogen Level (Too few data)
+#ggplot(data_use, aes(x = Pre_Fibrinogen)) + 
+  #geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  #labs(title = "Histogram of Preoperative Fibrinogen Level", x = "Pre Fibrinogen Score", y = "Frequency")
+
+# Plotting a histogram for Preoperative Creatinine Level
+ggplot(data_use, aes(x = Pre_Creatinine)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Preoperative Creatinine Level", x = "Pre Creatinine Score", y = "Frequency")
+
+# Plotting a histogram for Intraoperative Fresh Frozen Plasma Administered
+ggplot(data_use, aes(x = intra_plasma)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Intraoperative Fresh Frozen Plasma Administered", x = "Intra Plasma", y = "Frequency")
+
+# Plotting a histogram for Intraoperative Packed Red Blood Cell Unit Administered
+ggplot(data_use, aes(x = intra_packed_cells)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Intraoperative Packed Red Blood Cell Unit Administered", x = "Intra Packed Cells", y = "Frequency")
+
+# Plotting a histogram for Intraoperative Platelets Unit Administered
+ggplot(data_use, aes(x = Intra_Platelets)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Intraoperative Platelets Unit Administered", x = "Intra Platelets Cells", y = "Frequency")
+
+# Plotting a histogram for Intraoperative Platelets Unit Administered
+ggplot(data_use, aes(x = Intra_Platelets)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Intraoperative Platelets Unit Administered", x = "Intra Platelets Cells", y = "Frequency")
+
+# Plotting a histogram for Intraoperative Cryoprecipitate Unit Administered
+ggplot(data_use, aes(x = Intra_Cryoprecipitate)) + 
+  geom_histogram(bins = 5, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Intraoperative Cryoprecipitate Unit Administered", x = "Intra Cryoprecipitate Cells", y = "Frequency")
+
+# Plotting a histogram for ICU stay
+ggplot(data_use, aes(x = icu_stay)) + 
+  geom_histogram(bins = 5, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of ICU Stay in Patients", x = "ICU Stay (Days)", y = "Frequency")
+
+# Plotting a histogram for ICU LOS (Length of Stay) - same as ICU stay, with 1 observation removed as LOS is too high
+#ggplot(data_use, aes(x = ICU_LOS)) + 
+  #geom_histogram(bins = 5, fill = "lightblue", color = "black") +
+  #labs(title = "Histogram of ICU Stay in Patients", x = "ICU Stay (Days)", y = "Frequency")
+
+# Plotting a histogram for Hospital Length of Stay
+ggplot(data_use, aes(x = HOSPITAL_LOS)) + 
+  geom_histogram(bins = 5, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Hospital Length of Stay", x = "Hospital LOS (Days)", y = "Frequency")
+
+### Flag! Study ID #51
+
+# Plotting a histogram for Total RBC Unit Tranfused 72 hrs Post Surgery
+ggplot(data_use, aes(x = rbc_72_tot)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Total RBC Unit Tranfused 72 hrs Post Surgery", x = "Total RBC Unit Tranfused", y = "Frequency")
+
+# Plotting a histogram for Total Fresh Frozen Plasma Unit Tranfused 72 hrs Post Surgery
+ggplot(data_use, aes(x = ffp_72_tot)) + 
+  geom_histogram(bins = 5, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Total Fresh Frozen Plasma Unit Tranfused 72 hrs Post Surgery", x = "Total Fresh Frozen Plasma Unit Tranfused", y = "Frequency")
+
+# Plotting a histogram for Total Platelets Tranfused 72 hrs Post Surgery
+ggplot(data_use, aes(x = plt_72_tot)) + 
+  geom_histogram(bins = 5, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Total Platelets Tranfused 72 hrs Post Surgery", x = "Total Platelets Tranfused", y = "Frequency")
+
+# Plotting a histogram for Total Cryoprecipitate Unit Tranfused 72 hrs Post Surgery
+ggplot(data_use, aes(x = cryo_72_tot)) + 
+  geom_histogram(bins = 5, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Total Cryoprecipitate Unit Tranfused 72 hrs Post Surgery", x = "Total Cryoprecipitate Unit Tranfused", y = "Frequency")
+
+# Plotting a histogram for Total RBC Unit Tranfused during the first 24 Hr of surgery (including intraop and post op)
+ggplot(data_use, aes(x = tot_24_rbc)) + 
+  geom_histogram(bins = 5, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Total RBC Unit Tranfused in the First 24 hrs of Surgery", x = "Total RBC Unit Tranfused", y = "Frequency")
 
