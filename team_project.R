@@ -125,12 +125,15 @@ categorical_vars <- c("gender_male", "aat_deficiency", "cys_fib", "ipah", "ild",
                       "evlp", "preop_ecls", "intraop_ecls", "ECLS_ECMO", "ECLS_CPB", "ALIVE_30DAYS_YN",
                       "ALIVE_90DAYS_YN", "ALIVE_12MTHS_YN", "massive_transfusion")
 
-# Specify the conitnous variables
+# Specify the continuous variables
 continuous_vars <- c("las", "Pre_Hb", "Pre_Hct", "Pre_Platelets", "Pre_PT", "Pre_INR",
                      "Pre_PTT", "Pre_Fibrinogen", "Pre_Creatinine", "intra_plasma",
                      "intra_packed_cells", "Intra_Platelets", "Intra_Cryoprecipitate",
                      "icu_stay", "ICU_LOS", "HOSPITAL_LOS", "rbc_72_tot", "ffp_72_tot",
                      "plt_72_tot", "cryo_72_tot", "tot_24_rbc")
+
+# Converting categorical variables to factors
+data_use[categorical_vars] <- lapply(data_use[categorical_vars], as.factor)
 
 # Create a vector for all the variables in the dataset
 all_vars <- c(categorical_vars, continuous_vars)
@@ -410,3 +413,4 @@ data_use1 <- data_use %>%
       rowSums(across(c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate))) == 0, 0, 1
     )
   )
+
