@@ -4,6 +4,7 @@
 library(readxl)
 library(dplyr)
 library(tableone)
+library(glmnet)
 
 #########################################
 ##### Loading and Cleaning the Data #####
@@ -70,7 +71,7 @@ data <- data_orig %>%
 
 # Select the relevant data
 data_use <- data %>%
-  select(study_id, tx_db_id, or_date, gender_male, aat_deficiency, cys_fib, ipah, 
+  select(Type, study_id, tx_db_id, or_date, gender_male, aat_deficiency, cys_fib, ipah, 
          ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud, renal_fail, stroke, 
          liver_disease, thyroid_disease, first_transplant, redo_transplant, evlp, preop_ecls,
          las, Pre_Hb, Pre_Hct, Pre_Platelets, Pre_PT, Pre_INR, Pre_PTT, Pre_Fibrinogen, Pre_Creatinine,
@@ -78,7 +79,8 @@ data_use <- data %>%
          icu_stay, DEATH_DATE, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
          rbc_0_24, rbc_24_48, rbc_48_72, rbc_72_tot, ffp_0_24, ffp_24_48, ffp_48_72, ffp_72_tot,
          plt_0_24, plt_24_48, plt_48_72, plt_72_tot, cryo_0_24, cryo_24_48, cryo_48_72, cryo_72_tot,
-         tot_24_rbc, massive_transfusion)
+         tot_24_rbc, massive_transfusion, Age, BMI) %>%
+  mutate(type = if_else(Type == "Bilateral", "Double", "Single"))
 
 # structure
 str(data_use)
@@ -91,8 +93,6 @@ binary_chr_cols <- sapply(data_use, function(col) all(col %in% c("TRUE", "FALSE"
 
 # Convert these columns to numeric (0/1)
 data_use[, binary_chr_cols] <- lapply(data_use[, binary_chr_cols], function(col) as.numeric(col == "TRUE"))
-
-
 
 # Identify columns with "Y"/"N" values stored as character
 yn_cols <- sapply(data_use, function(col) all(col %in% c("Y", "N", NA)))
@@ -119,7 +119,7 @@ ncol(data_use)
 #####################################
 
 # Specify the categorical variables
-categorical_vars <- c("gender_male", "aat_deficiency", "cys_fib", "ipah", "ild", "pulm_other",
+categorical_vars <- c("type", "gender_male", "aat_deficiency", "cys_fib", "ipah", "ild", "pulm_other",
                       "cad", "Hypertension", "t1d", "t2d", "gerd_pud", "renal_fail", "stroke",
                       "liver_disease", "thyroid_disease", "first_transplant", "redo_transplant",
                       "evlp", "preop_ecls", "intraop_ecls", "ECLS_ECMO", "ECLS_CPB", "ALIVE_30DAYS_YN",
@@ -130,7 +130,7 @@ continuous_vars <- c("las", "Pre_Hb", "Pre_Hct", "Pre_Platelets", "Pre_PT", "Pre
                      "Pre_PTT", "Pre_Fibrinogen", "Pre_Creatinine", "intra_plasma",
                      "intra_packed_cells", "Intra_Platelets", "Intra_Cryoprecipitate",
                      "icu_stay", "ICU_LOS", "HOSPITAL_LOS", "rbc_72_tot", "ffp_72_tot",
-                     "plt_72_tot", "cryo_72_tot", "tot_24_rbc")
+                     "plt_72_tot", "cryo_72_tot", "tot_24_rbc", "Age", "BMI")
 
 # Converting categorical variables to factors
 data_use[categorical_vars] <- lapply(data_use[categorical_vars], as.factor)
@@ -407,10 +407,45 @@ ggplot(data_use, aes(x = tot_24_rbc)) +
 ####################################
 
 # Create a column for transfusion indicator
-data_use1 <- data_use %>%
-  mutate(
-    transfusion = if_else(
+data_use_lasso <- data_use %>%
+  mutate(transfusion = if_else(
       rowSums(across(c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate))) == 0, 0, 1
     )
-  )
+  ) %>% 
+  select(Age, type, ECLS_CPB, ECLS_ECMO, cys_fib, Pre_Hb, Pre_Hct, Pre_Platelets, 
+    Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, Hypertension, preop_ecls, intraop_ecls, transfusion)
+
+# Removing NA row from data set (complete case analysis)
+data_use_lasso_v1 <- na.omit(data_use_lasso)
+
+# cv for Lasso
+set.seed(789)
+
+train_indices <- sample(nrow(data_use_lasso_v1), round(nrow(data_use_lasso_v1) / 2))
+
+
+x_all <- model.matrix(transfusion ~ ., data_use_lasso_v1)
+
+x_train <- x_all[train_indices, -1]
+x_validation <- x_all[-train_indices, -1]
+
+y_train <- data_use_lasso_v1$transfusion[train_indices]
+y_validation <- data_use_lasso_v1$transfusion[-train_indices]
+
+
+lasso_mod <- glmnet(x_train, y_train, alpha = 1, family = "binomial")
+
+cv_lasso <- cv.glmnet(x_train, y_train, alpha = 1, family = "binomial", type.measure = "auc", nfolds = 5)
+
+plot(cv_lasso)
+title(main = "AUC Cross-Validation Curve for Lasso Regression", line = 3)
+
+lambda_min <- cv_lasso$lambda.min
+coef(cv_lasso, s = "lambda.min")
+
+
+
+
+
+
 
