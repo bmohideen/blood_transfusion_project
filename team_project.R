@@ -420,33 +420,35 @@ data_use_lasso_all <- data_use %>%
          Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
          preop_ecls, intraop_ecls, las, transfusion)
 
+# Check for missing values
+colSums(is.na(data_use_lasso_all))
+
 # Removing NA row from data set (complete case analysis)
 data_use_lasso_all_v1 <- na.omit(data_use_lasso)
 
 # cv for Lasso
 set.seed(789)
 
-train_indices <- sample(nrow(data_use_lasso_v1), round(nrow(data_use_lasso_v1) / 2))
+train_indices_all <- sample(nrow(data_use_lasso_all_v1), round(nrow(data_use_lasso_all_v1) / 2))
 
+x_all_all <- model.matrix(transfusion ~ ., data_use_lasso_all_v1)
 
-x_all <- model.matrix(transfusion ~ ., data_use_lasso_v1)
+x_train_all <- x_all_all[train_indices_all, -1]
+x_validation_all <- x_all_all[-train_indices_all, -1]
 
-x_train <- x_all[train_indices, -1]
-x_validation <- x_all[-train_indices, -1]
+y_train_all <- data_use_lasso_all_v1$transfusion[train_indices_all]
+y_validation_all <- data_use_lasso_all_v1$transfusion[-train_indices_all]
 
-y_train <- data_use_lasso_v1$transfusion[train_indices]
-y_validation <- data_use_lasso_v1$transfusion[-train_indices]
+lasso_mod_all <- glmnet(x_train_all, y_train_all, alpha = 1, family = "binomial")
 
+cv_lasso_all <- cv.glmnet(x_train_all, y_train_all, alpha = 1, family = "binomial", 
+                          type.measure = "auc", nfolds = 5)
 
-lasso_mod <- glmnet(x_train, y_train, alpha = 1, family = "binomial")
-
-cv_lasso <- cv.glmnet(x_train, y_train, alpha = 1, family = "binomial", type.measure = "auc", nfolds = 5)
-
-plot(cv_lasso)
+plot(cv_lasso_all)
 title(main = "AUC Cross-Validation Curve for Lasso Regression", line = 3)
 
-lambda_min <- cv_lasso$lambda.min
-coef(cv_lasso, s = "lambda.min")
+lambda_min_all <- cv_lasso_all$lambda.min
+coef(cv_lasso_all, s = "lambda.min")
 
 
 
