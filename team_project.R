@@ -406,6 +406,56 @@ ggplot(data_use, aes(x = tot_24_rbc)) +
 #####     Lasso Regression     #####
 ####################################
 
+# With all variables
+## Did not include Pre_Fibrinogen bc there were many missing values
+## Did not include Pre_PT BC Pre_INR is the standardized ver of it
+data_use_lasso_all <- data_use %>%
+  mutate(transfusion = if_else(
+    rowSums(across(c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate))) == 0, 0, 1
+  )
+  ) %>% 
+  select(Age, type, aat_deficiency, ECLS_CPB, ECLS_ECMO, cys_fib, ipah, ild, pulm_other, 
+         cad, Hypertension, t2d, t1d, gerd_pud, renal_fail, stroke, liver_disease, 
+         thyroid_disease, evlp, Pre_Hb, Pre_Hct, Pre_Platelets, 
+         Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
+         preop_ecls, intraop_ecls, las, transfusion)
+
+# Removing NA row from data set (complete case analysis)
+data_use_lasso_all_v1 <- na.omit(data_use_lasso)
+
+# cv for Lasso
+set.seed(789)
+
+train_indices <- sample(nrow(data_use_lasso_v1), round(nrow(data_use_lasso_v1) / 2))
+
+
+x_all <- model.matrix(transfusion ~ ., data_use_lasso_v1)
+
+x_train <- x_all[train_indices, -1]
+x_validation <- x_all[-train_indices, -1]
+
+y_train <- data_use_lasso_v1$transfusion[train_indices]
+y_validation <- data_use_lasso_v1$transfusion[-train_indices]
+
+
+lasso_mod <- glmnet(x_train, y_train, alpha = 1, family = "binomial")
+
+cv_lasso <- cv.glmnet(x_train, y_train, alpha = 1, family = "binomial", type.measure = "auc", nfolds = 5)
+
+plot(cv_lasso)
+title(main = "AUC Cross-Validation Curve for Lasso Regression", line = 3)
+
+lambda_min <- cv_lasso$lambda.min
+coef(cv_lasso, s = "lambda.min")
+
+
+
+
+
+
+
+
+
 # Create a column for transfusion indicator
 data_use_lasso <- data_use %>%
   mutate(transfusion = if_else(
