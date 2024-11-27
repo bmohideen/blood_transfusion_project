@@ -6,6 +6,8 @@ library(dplyr)
 library(tableone)
 library(glmnet)
 library(pROC)
+library(tree)
+library(mice)
 
 #########################################
 ##### Loading and Cleaning the Data #####
@@ -412,7 +414,9 @@ ggplot(data_use, aes(x = tot_24_rbc)) +
 ## Did not include Pre_PT BC Pre_INR is the standardized ver of it
 data_use_lasso_all <- data_use %>%
   mutate(transfusion = if_else(
-    rowSums(across(c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate))) == 0, 0, 1
+    rowSums(across(
+      c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
+        rbc_72_tot, ffp_72_tot, plt_72_tot, cryo_72_tot))) == 0, 0, 1
   )
   ) %>% 
   select(Age, type, aat_deficiency, ECLS_CPB, ECLS_ECMO, cys_fib, ipah, ild, pulm_other, 
@@ -424,8 +428,9 @@ data_use_lasso_all <- data_use %>%
 # Check for missing values
 colSums(is.na(data_use_lasso_all))
 
-# Removing NA row from data set (complete case analysis)
-data_use_lasso_all_v1 <- na.omit(data_use_lasso)
+# Imputing for missing data
+imp <- mice(data_use_lasso_all, seed = 123, m = 20, print = FALSE)
+data_use_lasso_all_v1 <- complete(imp, action = 1)
 
 # cv for Lasso
 set.seed(789)
@@ -471,7 +476,10 @@ legend("bottomleft", legend = c("Optimal Lambda (Min MSE)"),
 # Create a column for transfusion indicator
 data_use_lasso <- data_use %>%
   mutate(transfusion = if_else(
-      rowSums(across(c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate))) == 0, 0, 1
+      rowSums(
+        across(
+          c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
+            rbc_72_tot, ffp_72_tot, plt_72_tot, cryo_72_tot))) == 0, 0, 1
     )
   ) %>% 
   select(Age, type, ECLS_CPB, ECLS_ECMO, cys_fib, Pre_Hb, Pre_Hct, Pre_Platelets, 
