@@ -570,6 +570,7 @@ data_use_lasso_all_v1$transfusion <- as.factor(data_use_lasso_all_v1$transfusion
 # Initialize AUC storage and plot list
 pruned_cart_aucs <- c()
 pruned_cart_plots <- list()
+pruned_cart_roc <- list()
 
 # Set seed for reproducibility
 set.seed(789)
@@ -609,6 +610,9 @@ for (i in 1:5) {
   
   # Safely record the plot
   pruned_cart_plots[[i]] <- recordPlot()
+  
+  plot(roc_pruned)
+  pruned_cart_roc[[i]] <- recordPlot()
 }
 
 # Create a data frame with each model's AUCs as rows and iterations as columns
@@ -638,6 +642,23 @@ cart_plots1
 ggsave("CART_plots.png", cart_plots1, width = 12, height = 8, dpi = 300)
 
 
+cart_plots2 <- ggarrange(plotlist = pruned_cart_roc,
+                         labels = c("A", "B", "C", "D", "E"),
+                         widths = c(1, 1),
+                         heights = c(4, 4),
+                         ncol = 3,
+                         nrow = 2
+) %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure 7. pruned (A, B, C, D, E) tree ROC curves for repeated trials.", 
+      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+cart_plots2
+
+ggsave("CART_plots_2.png", cart_plots2, width = 12, height = 8, dpi = 300)
+
 ##############################################
 ##### With Literature Relevant variables #####
 ##############################################
@@ -648,6 +669,7 @@ data_use_lasso_v1$transfusion <- as.factor(data_use_lasso_v1$transfusion)
 # Initialize AUC storage and plot list
 pruned_lit_cart_aucs <- c()
 pruned_lit_cart_plots <- list()
+pruned_lit_cart_roc <- list()
 
 # Set seed for reproducibility
 set.seed(789)
@@ -687,6 +709,9 @@ for (i in 1:5) {
   
   # Safely record the plot
   pruned_lit_cart_plots[[i]] <- recordPlot()
+  
+  plot(roc_pruned)
+  pruned_lit_cart_roc[[i]] <- recordPlot()
 }
 
 # Create a data frame with each model's AUCs as rows and iterations as columns
@@ -702,7 +727,7 @@ lit_auc_df <- data.frame(
 
 print(lit_auc_df)
 
-cart_plots1 <- ggarrange(plotlist = pruned_lit_cart_plots,
+cart_plots3 <- ggarrange(plotlist = pruned_lit_cart_plots,
                          labels = c("A", "B", "C", "D", "E")
 ) %>%
   annotate_figure(
@@ -711,9 +736,27 @@ cart_plots1 <- ggarrange(plotlist = pruned_lit_cart_plots,
       size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
-cart_plots1
+cart_plots3
 
-ggsave("CART_plots.png", cart_plots1, width = 12, height = 8, dpi = 300)
+ggsave("CART_plots_3.png", cart_plots3, width = 12, height = 8, dpi = 300)
+
+
+cart_plots4 <- ggarrange(plotlist = pruned_lit_cart_roc,
+                         labels = c("A", "B", "C", "D", "E"),
+                         widths = c(1, 1),
+                         heights = c(4, 4),
+                         ncol = 3,
+                         nrow = 2
+) %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure 7. pruned (A, B, C, D, E) tree ROC curves for literature repeated trials.", 
+      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+cart_plots4
+
+ggsave("CART_plots_4.png", cart_plots4, width = 12, height = 8, dpi = 300)
 
 
                               ##### QUESTION 2 STUFF #######
