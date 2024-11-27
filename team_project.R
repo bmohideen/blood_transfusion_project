@@ -8,6 +8,9 @@ library(glmnet)
 library(pROC)
 library(tree)
 library(mice)
+library(ggpubr)
+library(grid)
+
 
 #########################################
 ##### Loading and Cleaning the Data #####
@@ -561,11 +564,15 @@ auc_lasso
 ##### With all variables #####
 ##############################
 
+# Ensure the response variable is a factor
+data_use_lasso_all_v1$transfusion <- as.factor(data_use_lasso_all_v1$transfusion)
+
+# Initialize AUC storage and plot list
+pruned_cart_aucs <- c()
+pruned_cart_plots <- list()
 
 # Set seed for reproducibility
 set.seed(789)
-
-pruned_cart_aucs <- c()
 
 # Repeat the process 5 times
 for (i in 1:5) {
@@ -576,23 +583,32 @@ for (i in 1:5) {
   ## CART
   
   # Train classification tree using the training data
-  tree_model <- tree(transfusion ~ ., data = data_use_lasso_all_v1, subset = train_indices, method = "class")
+  tree_model <- tree(transfusion ~ ., data = data_use_lasso_all_v1, subset = train_indices)
   
   # Cross-validation for pruning to find the optimal size
-  cv_tree <- cv.tree(tree_model, FUN = prune.tree, K = 5)
+  cv_tree <- cv.tree(tree_model, FUN = prune.misclass, K = 5)
   best_size <- ifelse(min(cv_tree$size) == 1, 2, cv_tree$size[which.min(cv_tree$dev)])
   
   # Prune the tree
   pruned_tree <- prune.misclass(tree_model, best = best_size)
   
   # Predictions and AUC from ROC curve for pruned CART on validation set
-  pred_pruned <- predict(pruned_tree, newdata = data_use_lasso_all_v1[-train_indices, ], type = "vector")
-  pred_probs_pruned <- as.numeric(pred_pruned[, 2])
+  pred_probs_pruned <- predict(pruned_tree, newdata = data_use_lasso_all_v1[-train_indices, ], type = "vector")[, 2]
+  y_validation <- data_use_lasso_all_v1$transfusion[-train_indices]
+  
+  # Compute AUC
   roc_pruned <- roc(y_validation, pred_probs_pruned)
   auc_pruned <- roc_pruned$auc
+  
   # Add this iteration's AUC to the pruned_cart_aucs
   pruned_cart_aucs <- c(pruned_cart_aucs, auc_pruned)
   
+  # Plot and record the pruned tree
+  plot(pruned_tree, main = paste("Pruned CART - Iteration", i))
+  text(pruned_tree, pretty = 0)
+  
+  # Safely record the plot
+  pruned_cart_plots[[i]] <- recordPlot()
 }
 
 # Create a data frame with each model's AUCs as rows and iterations as columns
@@ -608,5 +624,17 @@ auc_df <- data.frame(
 
 print(auc_df)
 
+# Replay the recorded plots in a combined layout
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(1, 5)))  # Adjust layout as needed
 
+for (i in seq_along(pruned_cart_plots)) {
+  viewport_position <- viewport(
+    layout.pos.row = 1,
+    layout.pos.col = i
+  )
+  pushViewport(viewport_position)
+  replayPlot(pruned_cart_plots[[i]])  # Replay each recorded plot
+  upViewport()
+}
 
