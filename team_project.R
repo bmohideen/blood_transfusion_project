@@ -553,5 +553,60 @@ auc_lasso
 
 
 
+#######################################
+#####     CART Classification     #####
+#######################################
+
+##############################
+##### With all variables #####
+##############################
+
+
+# Set seed for reproducibility
+set.seed(789)
+
+pruned_cart_aucs <- c()
+
+# Repeat the process 5 times
+for (i in 1:5) {
+  
+  # Split data into training and validation sets (50/50 split)
+  train_indices <- sample(nrow(data_use_lasso_all_v1), round(nrow(data_use_lasso_all_v1) / 2))
+  
+  ## CART
+  
+  # Train classification tree using the training data
+  tree_model <- tree(transfusion ~ ., data = data_use_lasso_all_v1, subset = train_indices, method = "class")
+  
+  # Cross-validation for pruning to find the optimal size
+  cv_tree <- cv.tree(tree_model, FUN = prune.tree, K = 5)
+  best_size <- ifelse(min(cv_tree$size) == 1, 2, cv_tree$size[which.min(cv_tree$dev)])
+  
+  # Prune the tree
+  pruned_tree <- prune.misclass(tree_model, best = best_size)
+  
+  # Predictions and AUC from ROC curve for pruned CART on validation set
+  pred_pruned <- predict(pruned_tree, newdata = data_use_lasso_all_v1[-train_indices, ], type = "vector")
+  pred_probs_pruned <- as.numeric(pred_pruned[, 2])
+  roc_pruned <- roc(y_validation, pred_probs_pruned)
+  auc_pruned <- roc_pruned$auc
+  # Add this iteration's AUC to the pruned_cart_aucs
+  pruned_cart_aucs <- c(pruned_cart_aucs, auc_pruned)
+  
+}
+
+# Create a data frame with each model's AUCs as rows and iterations as columns
+auc_df <- data.frame(
+  Model = c("Pruned CART"),
+  Iteration1 = c(pruned_cart_aucs[1]),
+  Iteration2 = c(pruned_cart_aucs[2]),
+  Iteration3 = c(pruned_cart_aucs[3]),
+  Iteration4 = c(pruned_cart_aucs[4]),
+  Iteration5 = c(pruned_cart_aucs[5]),
+  Average = c(mean(pruned_cart_aucs))
+)
+
+print(auc_df)
+
 
 
