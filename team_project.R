@@ -408,7 +408,15 @@ ggplot(data_use, aes(x = tot_24_rbc)) +
 ####################################
 # In conjunction with the above, what is the impact of transfusion on patient outcomes, including mortality? #
 
-##### MAYBE DELETE?? Report the Median Time Until Death #####
+# get rid of pateints who did not get transfusion
+# 109 did and 83 didnt 
+data_use <- data_use %>%
+  mutate(transfusion = if_else(
+    rowSums(across(c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate))) == 0, 0, 1
+  ))
+
+
+#####  Report the Median Time Until Death #####
 # create a death variable in data_use 
 data_with_dead <- data_use %>%
   mutate(has_value = if_else(!is.na(data_use$DEATH_DATE), "1", "0"))
