@@ -728,7 +728,12 @@ lit_auc_df <- data.frame(
 print(lit_auc_df)
 
 cart_plots3 <- ggarrange(plotlist = pruned_lit_cart_plots,
-                         labels = c("A", "B", "C", "D", "E")
+                         labels = c("A", "B", "C", "D", "E"),
+                         widths = c(1,1),
+                         heights = c(4, 4),
+                         ncol = 3,
+                         nrow = 2
+                        
 ) %>%
   annotate_figure(
     bottom = text_grob(
