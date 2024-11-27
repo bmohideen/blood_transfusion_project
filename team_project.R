@@ -402,6 +402,51 @@ ggplot(data_use, aes(x = tot_24_rbc)) +
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Total RBC Unit Tranfused in the First 24 hrs of Surgery", x = "Total RBC Unit Tranfused", y = "Frequency")
 
+##### QUESTION 1 STUFF #######
+####################################
+#####     Some stuff     #####
+####################################
+# In conjunction with the above, what is the impact of transfusion on patient outcomes, including mortality? #
+
+##### MAYBE DELETE?? Report the Median Time Until Death #####
+# create a death variable in data_use 
+data_with_dead <- data_use %>%
+  mutate(has_value = if_else(!is.na(data_use$DEATH_DATE), "1", "0"))
+# convert to numberic
+data_with_dead$has_value <- as.numeric(data_with_dead$has_value)
+
+data_with_dead <- data_with_dead %>%
+  mutate(
+    DEATH_DATE = as.POSIXct(DEATH_DATE, format = "%d-%b-%Y"),
+    or_date = as.POSIXct(or_date, format = "%Y-%m-%d %H:%M:%S"),  # Adjust if needed
+    time_death = as.numeric(difftime(DEATH_DATE, or_date, units = "days"))
+  )
+
+
+# Use full data set (data_use) 
+library(survival)
+sf1 <- survfit(Surv(time_death, has_value==1)~1, data=data_with_dead)
+
+# add a plot
+plot(sf1, xlab = "Time (days)", ylab="Survival", conf.int = 0.95) ## Add a confidence interval 
+
+# see plot for where 0.5 is or something if we want to include this graph we can 
+
+# Kaplan-Meier Curve
+plot(sf1,xscale = 365.25, xlab = "Time (days)", ylab="Survival Probability") 
+# add a legend with col to distinguish levels
+
+# do more
+# Make a Cox PH model
+coxmod <- coxph(Surv(time_death, has_value==1) ~ 1+intraop_ecls+intra_plasma+intra_packed_cells+Intra_Platelets+Intra_Cryoprecipitate+icu_stay, data=data_with_dead)
+
+# Create a summary 
+summary(coxmod)
+
+
+
+
+##### QUESTION 1 STUFF #######
 ####################################
 #####     Lasso Regression     #####
 ####################################
