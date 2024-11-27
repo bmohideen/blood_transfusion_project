@@ -443,6 +443,30 @@ coxmod <- coxph(Surv(time_death, has_value==1) ~ 1+intraop_ecls+intra_plasma+int
 # Create a summary 
 summary(coxmod)
 
+# potential thing we could stratify by if we felt like it 
+data_icu <- data_with_dead %>%
+  mutate(
+    icu = case_when(
+      icu_stay <= 3 ~ "short",             # Short stay: 3 days or less
+      icu_stay > 3 & icu_stay <= 9 ~ "medium",  # Medium stay: 4 to 9 days
+      icu_stay > 10 ~ "long",               # Long stay: more than 10 days
+      TRUE ~ NA_character_                 # leave missing/invalid values
+    )
+  )
+# https://pmc.ncbi.nlm.nih.gov/articles/PMC4122095/#:~:text=A%20prolonged%20ICU%20stay%20of,the%20patients%20who%20were%20female.
+# https://ccforum.biomedcentral.com/articles/10.1186/s13054-024-04812-7 
+## I didnt really read these 
+
+# plot for stratifying with data_icu
+sf2 <- survfit(Surv(time_death, has_value==1)~icu, data=data_icu)
+# add a plot
+plot(sf2, xlab = "Time (days)", ylab="Survival", conf.int = 0.95) ## Add a confidence interval 
+
+# see plot for where 0.5 is or something if we want to include this graph we can 
+
+# Kaplan-Meier Curve
+plot(sf2,xscale = 365.25, xlab = "Time (days)", ylab="Survival Probability", col=1:3) 
+legend("topright",legend = c("Short", "Medium", "Long"),lty = 1, col = 1:3) 
 
 
 
