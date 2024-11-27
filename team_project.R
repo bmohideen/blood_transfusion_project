@@ -570,3 +570,216 @@ only_transf_patients <- data_use_lasso_all_amount %>%
 
 # Check for missing values
 colSums(is.na(only_transf_patients))
+
+# Imputing for missing data
+imp <- mice(only_transf_patients, seed = 123, m = 20, print = FALSE)
+only_transf_patients <- complete(imp, action = 1)
+
+#### RBC ####
+
+# cv for Lasso
+set.seed(789)
+
+train_indices_rbc <- sample(nrow(only_transf_patients), round(nrow(only_transf_patients) / 2))
+
+x_all_rbc <- model.matrix(tot_24_rbc ~ ., only_transf_patients)
+
+x_train_rbc <- x_all_rbc[train_indices_rbc, -1]
+x_validation_rbc <- x_all_rbc[-train_indices_rbc, -1]
+
+y_train_rbc <- only_transf_patients$tot_24_rbc[train_indices_rbc]
+y_validation_rbc <- only_transf_patients$tot_24_rbc[-train_indices_rbc]
+
+lasso_mod_rbc <- glmnet(x_train_rbc, y_train_rbc, alpha = 1, family = "gaussian")
+
+cv_lasso_rbc <- cv.glmnet(x_train_rbc, y_train_rbc, alpha = 1, family = "gaussian", 
+                          type.measure = "auc", nfolds = 5)
+
+plot(cv_lasso_rbc)
+title(main = "AUC Cross-Validation Curve for Lasso Regression", line = 3)
+
+lambda_min_rbc <- cv_lasso_rbc$lambda.min
+coef(cv_lasso_rbc, s = "lambda.min")
+
+# AUC plot
+par(family = "serif", cex = 1.2, mgp = c(2.5, 1, 0)) 
+plot(cv_lasso_rbc)
+title(main = "MSE vs. Log(Lambda) with 5-Fold Cross-Validation", line = 2.5)
+mtext("Figure: Mean Squared Error (MSE) values across log(lambda) during 5-fold cross-validation. The dotted vertical line represents the optimal lambda minimizing the MSE.", 
+      side = 1, line = 4, cex = 1, col = "black")
+legend("bottomleft", legend = c("Optimal Lambda (Min MSE)"), 
+       col = c("red"), 
+       lty = c(2, 2), cex = 0.8,  bty = "n")
+
+# Train data
+pred_lasso_rbc <- as.numeric(
+  predict(lasso_mod_rbc, 
+    newx = model.matrix(tot_24_rbc ~., only_transf_patients)[-train_indices,-1], 
+    s = cv_lasso_rbc$lambda.min, type = "response"))
+
+# plotting the ROC curve
+myroc_rbc <- roc(tot_24_rbc ~ pred_lasso_rbc, 
+             data = only_transf_patients[-train_indices,])
+
+plot(myroc_rbc)
+
+# extracting the Area Under the Curve, a measure of discrimination
+auc_lasso_rbc <- myroc_rbc$auc
+auc_lasso_rbc
+
+#### FFP ####
+
+# cv for Lasso
+set.seed(789)
+
+train_indices_ffp <- sample(nrow(only_transf_patients), round(nrow(only_transf_patients) / 2))
+
+x_all_ffp <- model.matrix(tot_24_plasma ~ ., only_transf_patients)
+
+x_train_ffp <- x_all_ffp[train_indices_ffp, -1]
+x_validation_ffp <- x_all_ffp[-train_indices_ffp, -1]
+
+y_train_ffp <- only_transf_patients$tot_24_plasma[train_indices_ffp]
+y_validation_ffp <- only_transf_patients$tot_24_plasma[-train_indices_ffp]
+
+lasso_mod_ffp <- glmnet(x_train_ffp, y_train_ffp, alpha = 1, family = "gaussian")
+
+cv_lasso_ffp <- cv.glmnet(x_train_ffp, y_train_ffp, alpha = 1, family = "gaussian", 
+                          type.measure = "auc", nfolds = 5)
+
+plot(cv_lasso_ffp)
+title(main = "AUC Cross-Validation Curve for Lasso Regression", line = 3)
+
+lambda_min_ffp <- cv_lasso_ffp$lambda.min
+coef(cv_lasso_ffp, s = "lambda.min")
+
+# AUC plot
+par(family = "serif", cex = 1.2, mgp = c(2.5, 1, 0)) 
+plot(cv_lasso_ffp)
+title(main = "MSE vs. Log(Lambda) with 5-Fold Cross-Validation", line = 2.5)
+mtext("Figure: Mean Squared Error (MSE) values across log(lambda) during 5-fold cross-validation. The dotted vertical line represents the optimal lambda minimizing the MSE.", 
+      side = 1, line = 4, cex = 1, col = "black")
+legend("bottomleft", legend = c("Optimal Lambda (Min MSE)"), 
+       col = c("red"), 
+       lty = c(2, 2), cex = 0.8,  bty = "n")
+
+# Train data
+pred_lasso_ffp <- as.numeric(
+  predict(lasso_mod_ffp, 
+          newx = model.matrix(tot_24_plasma ~., only_transf_patients)[-train_indices,-1], 
+          s = cv_lasso_ffp$lambda.min, type = "response"))
+
+# plotting the ROC curve
+myroc_ffp <- roc(tot_24_plasma ~ pred_lasso_ffp, 
+                 data = only_transf_patients[-train_indices,])
+
+plot(myroc_ffp)
+
+# extracting the Area Under the Curve, a measure of discrimination
+auc_lasso_ffp <- myroc_ffp$auc
+auc_lasso_ffp
+
+#### PLT ####
+
+# cv for Lasso
+set.seed(789)
+
+train_indices_plt <- sample(nrow(only_transf_patients), round(nrow(only_transf_patients) / 2))
+
+x_all_plt <- model.matrix(tot_24_plt ~ ., only_transf_patients)
+
+x_train_plt <- x_all_plt[train_indices_plt, -1]
+x_validation_plt <- x_all_plt[-train_indices_plt, -1]
+
+y_train_plt <- only_transf_patients$tot_24_plt[train_indices_plt]
+y_validation_plt <- only_transf_patients$tot_24_plt[-train_indices_plt]
+
+lasso_mod_plt <- glmnet(x_train_plt, y_train_plt, alpha = 1, family = "gaussian")
+
+cv_lasso_plt <- cv.glmnet(x_train_plt, y_train_plt, alpha = 1, family = "gaussian", 
+                          type.measure = "auc", nfolds = 5)
+
+plot(cv_lasso_plt)
+title(main = "AUC Cross-Validation Curve for Lasso Regression", line = 3)
+
+lambda_min_plt <- cv_lasso_plt$lambda.min
+coef(cv_lasso_plt, s = "lambda.min")
+
+# AUC plot
+par(family = "serif", cex = 1.2, mgp = c(2.5, 1, 0)) 
+plot(cv_lasso_plt)
+title(main = "MSE vs. Log(Lambda) with 5-Fold Cross-Validation", line = 2.5)
+mtext("Figure: Mean Squared Error (MSE) values across log(lambda) during 5-fold cross-validation. The dotted vertical line represents the optimal lambda minimizing the MSE.", 
+      side = 1, line = 4, cex = 1, col = "black")
+legend("bottomleft", legend = c("Optimal Lambda (Min MSE)"), 
+       col = c("red"), 
+       lty = c(2, 2), cex = 0.8,  bty = "n")
+
+# Train data
+pred_lasso_plt <- as.numeric(
+  predict(lasso_mod_plt, 
+          newx = model.matrix(tot_24_plt ~., only_transf_patients)[-train_indices,-1], 
+          s = cv_lasso_plt$lambda.min, type = "response"))
+
+# plotting the ROC curve
+myroc_plt <- roc(tot_24_plt ~ pred_lasso_plt, 
+                 data = only_transf_patients[-train_indices,])
+
+plot(myroc_plt)
+
+# extracting the Area Under the Curve, a measure of discrimination
+auc_lasso_plt <- myroc_plt$auc
+auc_lasso_plt
+
+#### CRYO ####
+
+# cv for Lasso
+set.seed(789)
+
+train_indices_cryo <- sample(nrow(only_transf_patients), round(nrow(only_transf_patients) / 2))
+
+x_all_cryo <- model.matrix(tot_24_cryo ~ ., only_transf_patients)
+
+x_train_cryo <- x_all_cryo[train_indices_cryo, -1]
+x_validation_cryo <- x_all_cryo[-train_indices_cryo, -1]
+
+y_train_cryo <- only_transf_patients$tot_24_cryo[train_indices_cryo]
+y_validation_cryo <- only_transf_patients$tot_24_cryo[-train_indices_cryo]
+
+lasso_mod_cryo <- glmnet(x_train_cryo, y_train_cryo, alpha = 1, family = "gaussian")
+
+cv_lasso_cryo <- cv.glmnet(x_train_cryo, y_train_cryo, alpha = 1, family = "gaussian", 
+                           type.measure = "auc", nfolds = 5)
+
+plot(cv_lasso_cryo)
+title(main = "AUC Cross-Validation Curve for Lasso Regression", line = 3)
+
+lambda_min_cryo <- cv_lasso_cryo$lambda.min
+coef(cv_lasso_cryo, s = "lambda.min")
+
+# AUC plot
+par(family = "serif", cex = 1.2, mgp = c(2.5, 1, 0)) 
+plot(cv_lasso_cryo)
+title(main = "MSE vs. Log(Lambda) with 5-Fold Cross-Validation", line = 2.5)
+mtext("Figure: Mean Squared Error (MSE) values across log(lambda) during 5-fold cross-validation. The dotted vertical line represents the optimal lambda minimizing the MSE.", 
+      side = 1, line = 4, cex = 1, col = "black")
+legend("bottomleft", legend = c("Optimal Lambda (Min MSE)"), 
+       col = c("red"), 
+       lty = c(2, 2), cex = 0.8,  bty = "n")
+
+# Train data
+pred_lasso_cryo <- as.numeric(
+  predict(lasso_mod_cryo, 
+          newx = model.matrix(tot_24_cryo ~., only_transf_patients)[-train_indices,-1], 
+          s = cv_lasso_cryo$lambda.min, type = "response"))
+
+# plotting the ROC curve
+myroc_cryo <- roc(tot_24_cryo ~ pred_lasso_cryo, 
+                  data = only_transf_patients[-train_indices,])
+
+plot(myroc_cryo)
+
+# extracting the Area Under the Curve, a measure of discrimination
+auc_lasso_cryo <- myroc_cryo$auc
+auc_lasso_cryo
+
