@@ -6,6 +6,7 @@ library(dplyr)
 library(tableone)
 library(glmnet)
 library(pROC)
+library(tidyr)
 
 #########################################
 ##### Loading and Cleaning the Data #####
@@ -166,7 +167,7 @@ pdf("num_table2.pdf", width = 10, height = 8)
 grid.table(num_table2)
 dev.off()
 
-# Boxplot of catogrical variables
+# Boxplot of categorical variables
 
 # Load necessary libraries
 library(ggplot2)
@@ -425,7 +426,7 @@ data_use_lasso_all <- data_use %>%
 colSums(is.na(data_use_lasso_all))
 
 # Removing NA row from data set (complete case analysis)
-data_use_lasso_all_v1 <- na.omit(data_use_lasso)
+data_use_lasso_all_v1 <- na.omit(data_use_lasso_all)
 
 # cv for Lasso
 set.seed(789)
@@ -529,7 +530,43 @@ plot(myroc)
 auc_lasso <- myroc$auc
 auc_lasso
 
+#### LASSO Regression: Amount of Transfusion ####
 
+# adding new columns with sum of 24 hour + intraoperative values
+data_use_with_sums <- data_use %>%
+  mutate(
+    tot_24_plasma = ffp_0_24 + intra_plasma,
+    tot_24_plt = plt_0_24 + Intra_Platelets,
+    tot_24_cryo = cryo_0_24 + Intra_Cryoprecipitate
+  )
 
+# Convert NA values to 0 in these columns
+# Should be coded as 0, rather than NA
+data_use_with_sums_v1 <- data_use_with_sums %>%
+  mutate(
+    tot_24_plasma = replace_na(tot_24_plasma, 0),
+    tot_24_plt = replace_na(tot_24_plt, 0),
+    tot_24_cryo = replace_na(tot_24_cryo, 0),
+    tot_24_rbc = replace_na(tot_24_rbc, 0)
+  )
 
+# includes all variables
+data_use_lasso_all_amount <- data_use_with_sums_v1 %>%
+  mutate(transfusion = if_else(
+    rowSums(across(c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate, 
+                     rbc_72_tot, ffp_72_tot, plt_72_tot, cryo_72_tot))) == 0, 0, 1
+  )
+  ) %>% 
+  select(Age, type, aat_deficiency, ECLS_CPB, ECLS_ECMO, cys_fib, ipah, ild, pulm_other, 
+         cad, Hypertension, t2d, t1d, gerd_pud, renal_fail, stroke, liver_disease, 
+         thyroid_disease, evlp, Pre_Hb, Pre_Hct, Pre_Platelets, 
+         Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
+         preop_ecls, intraop_ecls, las, transfusion, tot_24_rbc, tot_24_plasma, tot_24_plt, 
+         tot_24_cryo, massive_transfusion)
 
+# Filtering only for patients with a transfusion
+only_transf_patients <- data_use_lasso_all_amount %>%
+  filter(transfusion == 1)
+
+# Check for missing values
+colSums(is.na(only_transf_patients))
