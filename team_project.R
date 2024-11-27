@@ -131,6 +131,7 @@ summary(table_one, digits =2)
 ####################################
 #####     Some stuff     #####
 ####################################
+# Anything that has !!! means it needs review (by group)
 # In conjunction with the above, what is the impact of transfusion on patient outcomes, including mortality? #
 
 # get rid of pateints who did not get transfusion
@@ -146,7 +147,7 @@ data_use <- data_use %>%
 # create a death variable in data_use 
 data_with_dead <- data_use %>%
   mutate(has_value = if_else(!is.na(data_use$DEATH_DATE), "1", "0"))
-# convert to numberic
+# convert to numeric
 data_with_dead$has_value <- as.numeric(data_with_dead$has_value)
 
 data_with_dead <- data_with_dead %>%
@@ -156,9 +157,43 @@ data_with_dead <- data_with_dead %>%
     time_death = as.numeric(difftime(DEATH_DATE, or_date, units = "days"))
   )
 
+# time_death has a lot of missingness since DEATH_DATE has a lot of missingness
+# therefore if there is no DEATH_DATE assume that the patient was alive after a year so change the NA to 365 -> censoring date !!!
+### NOTE YOU IDIOT -> CHECK CRYSTALS QUESTION IN THE DISCUSSION TO SEE IF YOU CAN DO THIS !!!
+table(data_with_dead$time_death)
+
+data_with_dead <- data_with_dead %>%
+  mutate(
+    time_death = if_else(is.na(time_death), 365, time_death))
+
+summary(data_with_dead)
+# see where the NAs are 
+colSums(is.na(data_with_dead))
+
+
+# Wow! so much missingness and so many columns we may not need! clean up!!!
+# copied from main to get rid of stuff that may not be needed -> get rid of some stuff from original data set that is cofounding or 
+# high missingness (>30% or something)
+#### NOTE HERE THAT I WILL NEED TO USE THE IMPUTED DATA SET FROM MAIN !!!
+### ALSO CHECK IF THE VARIABLES INCLUDED ARE RIGHT/EVERYTHING WE NEED WITH GROUP !!!
+# removed study Id and tx_db_id
+# removed or_date and DEATH_DATE 
+# remove due to high missingness: pre_fibrinogen, rbc_0_24, rbc_24_48, rbc_48_72, ffp_0_24, ffp_24_48, ffp_48_72, plt_0_24, plt_24_48, plt_48_72
+# cryo_0_24, cryo_24_48, cyro_48_72
+data_with_dead <- data_with_dead %>%
+   select(Type, or_date, gender_male, aat_deficiency, cys_fib, ipah, 
+         ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud, renal_fail, stroke, 
+         liver_disease, thyroid_disease, first_transplant, redo_transplant, evlp, preop_ecls,
+        las, Pre_Hb, Pre_Hct, Pre_Platelets, Pre_PT, Pre_INR, Pre_PTT, Pre_Fibrinogen, Pre_Creatinine,
+         intraop_ecls, ECLS_ECMO, ECLS_CPB, intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
+        icu_stay, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
+         rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot,
+         tot_24_rbc, massive_transfusion, Age, BMI, time_death, has_value, transfusion) %>%
+  mutate(type = if_else(Type == "Bilateral", "Double", "Single"))
 
 # Use full data set (data_use) 
 library(survival)
+# delete/dont include these since they are not stratified? !!!
 sf1 <- survfit(Surv(time_death, has_value==1)~1, data=data_with_dead)
 
 # add a plot
@@ -178,6 +213,7 @@ coxmod <- coxph(Surv(time_death, has_value==1) ~ 1+intraop_ecls+intra_plasma+int
 summary(coxmod)
 
 ##### Stratify by if they got a transfusion #####
+### MAIN ANALYSIS !!!
 # potential limitation is that the amount of people who got the transfusion may be rather small...
 table(data_with_dead$transfusion)
 nrow(data_with_dead)
@@ -194,11 +230,16 @@ plot(sf3, xlab = "Time (days)", ylab="Survival", conf.int = 0.95) ## Add a confi
 plot(sf3,xscale = 365.25, xlab = "Time (days)", ylab="Survival Probability", col=1:2) 
 legend("topright",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:3) 
 
+# Cox model 
+coxmod3 <- coxph(Surv(time_death, has_value==1) ~ transfusion+intraop_ecls+intra_plasma+intra_packed_cells+Intra_Platelets+Intra_Cryoprecipitate+icu_stay, data=data_with_dead)
+summary(coxmod3)
 
+# do log rank test as well to compare transfusion or not transfusion 
+LR_test3 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=data_with_dead)
+LR_test3
 
-
-
-
+##### Stratify by length of ICU stay #####
+# this seems a little redundant, may not include in analysis !!!
 # potential thing we could stratify by if we felt like it 
 data_icu <- data_with_dead %>%
   mutate(
