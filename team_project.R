@@ -127,7 +127,7 @@ table_one <- CreateTableOne(vars = all_vars, data = data_use, factorVars = categ
 # View the summary statistics
 summary(table_one, digits =2)
 
-##### QUESTION 1 STUFF #######
+##### QUESTION 2 STUFF #######
 ####################################
 #####     Some stuff     #####
 ####################################
@@ -237,6 +237,45 @@ summary(coxmod3)
 # do log rank test as well to compare transfusion or not transfusion 
 LR_test3 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=data_with_dead)
 LR_test3
+
+####################################
+#####     LINEAR REGRESSION    #####
+####################################
+# Testing for the 3 outcomes -> ICU stay, Hospital stay, and time to death 
+# Bonferonni needed*** !!!
+
+### ICU stay
+# make linear regression model using WHICH PREDICTORS !!!
+# ICU STAY HAS ONE MISSING VARIABLE !!! # Literature review -> just do the yellow ones (+ age, BMI, comorbidities)
+## did not add has_value, transfusion, or type !!!
+# find literature source for this !!!
+model_icu <- lm(icu_stay ~ gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
+                + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot,
+                data = data_with_dead)
+# ensure the degrees of freedom for the predictors is okay (currently 10, 7 continuous variables and 1 factor with 4 levels)
+pred_num <- nrow(data_with_dead)/15 
+pred_num
+# gender_male is binary, rest are numeric
+# have 11 predictors so it is okay 
+
+# create the model summary
+summary(model_icu)
+
+### Hospital stay 
+model_hs <- lm(HOSPITAL_LOS ~ gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
+                + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot,
+                data = data_with_dead)
+summary(model_hs)
+
+### Time to death -> small number of obs... is this okay? would mess up the pred_num stuff... maybe not?
+# would it make more sense to do logistic for 
+# has_value as repsonse 
+model_ttd <- glm(has_value ~ gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
+                 + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot,
+                 data = data_with_dead,family = binomial)
+summary(model_ttd)
+
+
 
 ##### Stratify by length of ICU stay #####
 # this seems a little redundant, may not include in analysis !!!
