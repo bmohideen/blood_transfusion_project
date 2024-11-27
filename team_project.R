@@ -409,7 +409,10 @@ ggplot(data_use, aes(x = tot_24_rbc)) +
 #####     Lasso Regression     #####
 ####################################
 
-# With all variables
+##############################
+##### With all variables #####
+##############################
+
 ## Did not include Pre_Fibrinogen bc there were many missing values
 ## Did not include Pre_PT BC Pre_INR is the standardized ver of it
 data_use_lasso_all <- data_use %>%
@@ -466,7 +469,7 @@ legend("bottomleft", legend = c("Optimal Lambda (Min MSE)"),
        col = c("red"), 
        lty = c(2, 2), cex = 0.8,  bty = "n")
 
-# Train data
+# Validation data
 pred_lasso_all <- as.numeric(
   predict(
     lasso_mod_all, 
@@ -483,6 +486,9 @@ plot(myroc_all)
 auc_lasso_all <- myroc_all$auc
 auc_lasso_all
 
+##############################################
+##### With Literature Relevant variables #####
+##############################################
 
 # Create a column for transfusion indicator
 data_use_lasso <- data_use %>%
@@ -496,7 +502,7 @@ data_use_lasso <- data_use %>%
   select(Age, type, ECLS_CPB, ECLS_ECMO, cys_fib, Pre_Hb, Pre_Hct, Pre_Platelets, 
     Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, Hypertension, preop_ecls, intraop_ecls, transfusion)
 
-# Removing NA row from data set (complete case analysis)
+# Removing NA row from data set (complete case analysis) - only 1 missing for Pre_PTT
 data_use_lasso_v1 <- na.omit(data_use_lasso)
 
 # cv for Lasso
