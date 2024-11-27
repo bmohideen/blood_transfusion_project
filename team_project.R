@@ -494,11 +494,11 @@ for (i in repeats) {
   pred_lasso_all <- as.numeric(
     predict(
       lasso_mod_all, 
-      newx = x_validation, 
+      newx = x_validation_all, 
       s = cv_lasso_all$lambda.min, type = "response"))
   
   # Generate ROC
-  myroc_all <- roc(y_validation, pred_lasso_all)
+  myroc_all <- roc(y_validation_all, pred_lasso_all)
   # Plotting the ROC curve
   plot(myroc_all)
   # Save the plot
@@ -602,7 +602,7 @@ for (i in repeats) {
 # Combine five repetitions for each of the lasso coefficient, auc, and roc plots into their individual plots. Add labels and figure captions
 lasso_plots <- ggarrange(plotlist = lasso_plot,
                          labels = c("A", "B", "C", "D", "E"),
-                         widths = c(1, 1),
+                         widths = c(1, 1, 1),
                          heights = c(4, 4),
                          ncol = 3,
                          nrow = 2,
@@ -613,12 +613,14 @@ lasso_plots <- ggarrange(plotlist = lasso_plot,
       size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
+
 ggsave("lasso_plots.png", lasso_plots, width = 20, height = 10, dpi = 300)
+
 
 auc_plots <- ggarrange(plotlist = auc_plot,
                        labels = c("A", "B", "C", "D", "E"),
                        widths = c(1, 1),
-                       heights = c(4,4),
+                       heights = c(1,1),
                        ncol = 3,
                        nrow = 2) %>%
   annotate_figure(
