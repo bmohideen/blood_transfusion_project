@@ -466,11 +466,22 @@ legend("bottomleft", legend = c("Optimal Lambda (Min MSE)"),
        col = c("red"), 
        lty = c(2, 2), cex = 0.8,  bty = "n")
 
+# Train data
+pred_lasso_all <- as.numeric(
+  predict(
+    lasso_mod_all, 
+    newx = model.matrix(transfusion ~., data_use_lasso_all_v1)[-train_indices_all,-1], 
+    s = cv_lasso_all$lambda.min, type = "response"))
 
+# plotting the ROC curve
+myroc_all <- roc(transfusion ~ pred_lasso_all, 
+             data = data_use_lasso_all_v1[-train_indices_all,])
 
+plot(myroc_all)
 
-
-
+# extracting the Area Under the Curve, a measure of discrimination
+auc_lasso_all <- myroc_all$auc
+auc_lasso_all
 
 
 # Create a column for transfusion indicator
@@ -490,9 +501,7 @@ data_use_lasso_v1 <- na.omit(data_use_lasso)
 
 # cv for Lasso
 set.seed(789)
-
 train_indices <- sample(nrow(data_use_lasso_v1), round(nrow(data_use_lasso_v1) / 2))
-
 
 x_all <- model.matrix(transfusion ~ ., data_use_lasso_v1)
 
@@ -501,7 +510,6 @@ x_validation <- x_all[-train_indices, -1]
 
 y_train <- data_use_lasso_v1$transfusion[train_indices]
 y_validation <- data_use_lasso_v1$transfusion[-train_indices]
-
 
 lasso_mod <- glmnet(x_train, y_train, alpha = 1, family = "binomial")
 
