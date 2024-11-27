@@ -624,17 +624,94 @@ auc_df <- data.frame(
 
 print(auc_df)
 
-# Replay the recorded plots in a combined layout
-grid.newpage()
-pushViewport(viewport(layout = grid.layout(1, 5)))  # Adjust layout as needed
-
-for (i in seq_along(pruned_cart_plots)) {
-  viewport_position <- viewport(
-    layout.pos.row = 1,
-    layout.pos.col = i
+cart_plots1 <- ggarrange(plotlist = pruned_cart_plots,
+                         labels = c("A", "B", "C", "D", "E")
+) %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure 7. pruned (A, B, C, D, E) CART trees for repeated trials.", 
+      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
   )
-  pushViewport(viewport_position)
-  replayPlot(pruned_cart_plots[[i]])  # Replay each recorded plot
-  upViewport()
+cart_plots1
+
+ggsave("CART_plots.png", cart_plots1, width = 12, height = 8, dpi = 300)
+
+
+##############################################
+##### With Literature Relevant variables #####
+##############################################
+
+# Ensure the response variable is a factor
+data_use_lasso_v1$transfusion <- as.factor(data_use_lasso_v1$transfusion)
+
+# Initialize AUC storage and plot list
+pruned_lit_cart_aucs <- c()
+pruned_lit_cart_plots <- list()
+
+# Set seed for reproducibility
+set.seed(789)
+
+# Repeat the process 5 times
+for (i in 1:5) {
+  
+  # Split data into training and validation sets (50/50 split)
+  train_indices <- sample(nrow(data_use_lasso_v1), round(nrow(data_use_lasso_v1) / 2))
+  
+  ## CART
+  
+  # Train classification tree using the training data
+  tree_model <- tree(transfusion ~ ., data = data_use_lasso_v1, subset = train_indices)
+  
+  # Cross-validation for pruning to find the optimal size
+  cv_tree <- cv.tree(tree_model, FUN = prune.misclass, K = 5)
+  best_size <- ifelse(min(cv_tree$size) == 1, 2, cv_tree$size[which.min(cv_tree$dev)])
+  
+  # Prune the tree
+  pruned_tree <- prune.misclass(tree_model, best = best_size)
+  
+  # Predictions and AUC from ROC curve for pruned CART on validation set
+  pred_probs_pruned <- predict(pruned_tree, newdata = data_use_lasso_v1[-train_indices, ], type = "vector")[, 2]
+  y_validation <- data_use_lasso_v1$transfusion[-train_indices]
+  
+  # Compute AUC
+  roc_pruned <- roc(y_validation, pred_probs_pruned)
+  auc_pruned <- roc_pruned$auc
+  
+  # Add this iteration's AUC to the pruned_lit_cart_aucs
+  pruned_lit_cart_aucs <- c(pruned_lit_cart_aucs, auc_pruned)
+  
+  # Plot and record the pruned tree
+  plot(pruned_tree, main = paste("Pruned CART - Iteration", i))
+  text(pruned_tree, pretty = 0)
+  
+  # Safely record the plot
+  pruned_lit_cart_plots[[i]] <- recordPlot()
 }
+
+# Create a data frame with each model's AUCs as rows and iterations as columns
+lit_auc_df <- data.frame(
+  Model = c("Pruned CART"),
+  Iteration1 = c(pruned_lit_cart_aucs[1]),
+  Iteration2 = c(pruned_lit_cart_aucs[2]),
+  Iteration3 = c(pruned_lit_cart_aucs[3]),
+  Iteration4 = c(pruned_lit_cart_aucs[4]),
+  Iteration5 = c(pruned_lit_cart_aucs[5]),
+  Average = c(mean(pruned_lit_cart_aucs))
+)
+
+print(lit_auc_df)
+
+cart_plots1 <- ggarrange(plotlist = pruned_lit_cart_plots,
+                         labels = c("A", "B", "C", "D", "E")
+) %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure 7. pruned (A, B, C, D, E) CART trees for repeated trials.", 
+      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+cart_plots1
+
+ggsave("CART_plots.png", cart_plots1, width = 12, height = 8, dpi = 300)
 
