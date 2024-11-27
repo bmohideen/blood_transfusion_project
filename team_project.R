@@ -602,17 +602,18 @@ for (i in repeats) {
 # Combine five repetitions for each of the lasso coefficient, auc, and roc plots into their individual plots. Add labels and figure captions
 lasso_plots <- ggarrange(plotlist = lasso_plot,
                          labels = c("A", "B", "C", "D", "E"),
-                         widths = c(0.5, 0.5),
+                         widths = c(1, 1),
                          heights = c(4, 4),
                          ncol = 3,
-                         nrow = 2) %>%
+                         nrow = 2,
+                         align = "hv") %>%
   annotate_figure(
     bottom = text_grob(
       "Figure 4. Lasso coefficient paths for 5 repeated trials of Lasso regression. Variability in coefficient values as log lambda changes\nis shown for each of the 5 repetitions (A-E).", 
       size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
-ggsave("lasso_plots.png", lasso_plots, width = 18, height = 8, dpi = 300)
+ggsave("lasso_plots.png", lasso_plots, width = 20, height = 10, dpi = 300)
 
 auc_plots <- ggarrange(plotlist = auc_plot,
                        labels = c("A", "B", "C", "D", "E"),
