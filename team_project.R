@@ -5,6 +5,7 @@ library(readxl)
 library(dplyr)
 library(tableone)
 library(glmnet)
+library(pROC)
 
 #########################################
 ##### Loading and Cleaning the Data #####
@@ -450,6 +451,15 @@ title(main = "AUC Cross-Validation Curve for Lasso Regression", line = 3)
 lambda_min_all <- cv_lasso_all$lambda.min
 coef(cv_lasso_all, s = "lambda.min")
 
+# AUC plot
+par(family = "serif", cex = 1.2, mgp = c(2.5, 1, 0)) 
+plot(cv_lasso_all)
+title(main = "MSE vs. Log(Lambda) with 5-Fold Cross-Validation", line = 2.5)
+mtext("Figure: Mean Squared Error (MSE) values across log(lambda) during 5-fold cross-validation. The dotted vertical line represents the optimal lambda minimizing the MSE.", 
+      side = 1, line = 4, cex = 1, col = "black")
+legend("bottomleft", legend = c("Optimal Lambda (Min MSE)"), 
+       col = c("red"), 
+       lty = c(2, 2), cex = 0.8,  bty = "n")
 
 
 
@@ -489,13 +499,35 @@ lasso_mod <- glmnet(x_train, y_train, alpha = 1, family = "binomial")
 
 cv_lasso <- cv.glmnet(x_train, y_train, alpha = 1, family = "binomial", type.measure = "auc", nfolds = 5)
 
+# AUC plot
+par(family = "serif", cex = 1.2, mgp = c(2.5, 1, 0)) 
 plot(cv_lasso)
-title(main = "AUC Cross-Validation Curve for Lasso Regression", line = 3)
+title(main = "MSE vs. Log(Lambda) with 5-Fold Cross-Validation", line = 2.5)
+mtext("Figure: Mean Squared Error (MSE) values across log(lambda) during 5-fold cross-validation. The dotted vertical line represents the optimal lambda minimizing the MSE.", 
+      side = 1, line = 4, cex = 1, col = "black")
+legend("bottomleft", legend = c("Optimal Lambda (Min MSE)"), 
+       col = c("red"), 
+       lty = c(2, 2), cex = 0.8,  bty = "n")
 
 lambda_min <- cv_lasso$lambda.min
 coef(cv_lasso, s = "lambda.min")
 
+# Train data
+pred_lasso <- as.numeric(
+  predict(
+    lasso_mod, 
+    newx = model.matrix(transfusion ~., data_use_lasso_v1)[-train_indices,-1], 
+    s = cv_lasso$lambda.min, type = "response"))
 
+# plotting the ROC curve
+myroc <- roc(transfusion ~ pred_lasso, 
+             data = data_use_lasso_v1[-train_indices,])
+
+plot(myroc)
+
+# extracting the Area Under the Curve, a measure of discrimination
+auc_lasso <- myroc$auc
+auc_lasso
 
 
 
