@@ -408,6 +408,7 @@ ggplot(data_use, aes(x = tot_24_rbc)) +
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Total RBC Unit Tranfused in the First 24 hrs of Surgery", x = "Total RBC Unit Tranfused", y = "Frequency")
 
+
 ####################################
 #####     Lasso Regression     #####
 ####################################
@@ -431,6 +432,9 @@ data_use_lasso_all <- data_use %>%
          Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
          preop_ecls, intraop_ecls, las, transfusion)
 
+# Factor transfusion
+data_use_lasso_all$transfusion <- as.factor(data_use_lasso_all$transfusion)
+
 # Check for missing values
 colSums(is.na(data_use_lasso_all))
 
@@ -438,56 +442,78 @@ colSums(is.na(data_use_lasso_all))
 imp <- mice(data_use_lasso_all, seed = 123, m = 20, print = FALSE)
 data_use_lasso_all_v1 <- complete(imp, action = 1)
 
-# cv for Lasso
-set.seed(789)
+# Create a sequence of repeat indices from 1 to 5, since the assessment will be completed for 5 repeats
+repeats <- seq(from = 1, to = 5, by = 1)
+# Create empty numeric vector store AUC values for each repeat
+lasso_auc_all <- numeric(length = length(repeats))
+# Create empty numeric vector to store minimum lambda values that maximize the AUC for each repeat
+lambda_min_all <- numeric(length = length(repeats))
+# Create empty list to store the coefficients
+coef_all <- list()
+# Create empty list to store lasso coefficient path plots for each repeat
+lasso_plot_all <- list()
+# Create empty list to store AUC plots for each repeat
+auc_plot_all <- list()
+# Create empty list to store ROC plots for each repeat
+roc_plot_all <- list()
 
-train_indices_all <- sample(nrow(data_use_lasso_all_v1), round(nrow(data_use_lasso_all_v1) / 2))
 
-x_all_all <- model.matrix(transfusion ~ ., data_use_lasso_all_v1)
-
-x_train_all <- x_all_all[train_indices_all, -1]
-x_validation_all <- x_all_all[-train_indices_all, -1]
-
-y_train_all <- data_use_lasso_all_v1$transfusion[train_indices_all]
-y_validation_all <- data_use_lasso_all_v1$transfusion[-train_indices_all]
-
-lasso_mod_all <- glmnet(x_train_all, y_train_all, alpha = 1, family = "binomial")
-
-cv_lasso_all <- cv.glmnet(x_train_all, y_train_all, alpha = 1, family = "binomial", 
-                          type.measure = "auc", nfolds = 5)
-
-plot(cv_lasso_all)
-title(main = "AUC Cross-Validation Curve for Lasso Regression", line = 3)
-
-lambda_min_all <- cv_lasso_all$lambda.min
-coef(cv_lasso_all, s = "lambda.min")
-
-# AUC plot
-par(family = "serif", cex = 1.2, mgp = c(2.5, 1, 0)) 
-plot(cv_lasso_all)
-title(main = "MSE vs. Log(Lambda) with 5-Fold Cross-Validation", line = 2.5)
-mtext("Figure: Mean Squared Error (MSE) values across log(lambda) during 5-fold cross-validation. The dotted vertical line represents the optimal lambda minimizing the MSE.", 
-      side = 1, line = 4, cex = 1, col = "black")
-legend("bottomleft", legend = c("Optimal Lambda (Min MSE)"), 
-       col = c("red"), 
-       lty = c(2, 2), cex = 0.8,  bty = "n")
-
-# Validation data
-pred_lasso_all <- as.numeric(
-  predict(
-    lasso_mod_all, 
-    newx = model.matrix(transfusion ~., data_use_lasso_all_v1)[-train_indices_all,-1], 
-    s = cv_lasso_all$lambda.min, type = "response"))
-
-# plotting the ROC curve
-myroc_all <- roc(transfusion ~ pred_lasso_all, 
-             data = data_use_lasso_all_v1[-train_indices_all,])
-
-plot(myroc_all)
-
-# extracting the Area Under the Curve, a measure of discrimination
-auc_lasso_all <- myroc_all$auc
-auc_lasso_all
+# Create a loop that completes 5 repeats of lasso regression, cross validation, 
+# testing on test set, and roc plot
+for (i in repeats) {
+  # Set seed for each iteration
+  set.seed(i)
+  
+  # Randomly select row indices for training set and split the data into training and testing sets
+  train_indices_all <- sample(nrow(data_use_lasso_all_v1), round(nrow(data_use_lasso_all_v1) / 2))
+  # Create a model matrix
+  x_all_all <- model.matrix(transfusion ~ ., data_use_lasso_all_v1)
+  # Select training set
+  x_train_all <- x_all_all[train_indices_all, -1]
+  # Select the rest as test set
+  x_validation_all <- x_all_all[-train_indices_all, -1]
+  # Select response set for training
+  y_train_all <- data_use_lasso_all_v1$transfusion[train_indices_all]
+  # Select response set for testing
+  y_validation_all <- data_use_lasso_all_v1$transfusion[-train_indices_all]
+  # Fit the lasso model
+  lasso_mod_all <- glmnet(x_train_all, y_train_all, alpha = 1, family = "binomial")
+  # Plot and store the lasso coefficient path plot
+  par(bg = "#00000000")
+  plot(lasso_mod_all, label = T, xvar = "lambda")
+  lasso_plot_all[[i]] <- recordPlot()
+  
+  # Conduct cross validation with AUC as the measure 
+  cv_lasso_all <- cv.glmnet(x_train_all, y_train_all, alpha = 1, 
+                            family = "binomial", type.measure = "auc", nfolds = 5)
+  # Plot the cross-validation error as a function of lambda
+  par(bg = "#00000000")
+  plot(cv_lasso_all)
+  # Store the plot
+  auc_plot_all[[i]] <- recordPlot()
+  # Extract and store the lambda value that maximizes AUC
+  lambda_min_all[i] <- cv_lasso_all$lambda.min
+  # Extract and store the relevant coefficients for the associated lambda value
+  coef_all[i] <- coef(cv_lasso_all, s = "lambda.min")
+  
+  # Testing in the test set. Validation.
+  pred_lasso_all <- as.numeric(
+    predict(
+      lasso_mod_all, 
+      newx = x_validation_all, 
+      s = cv_lasso_all$lambda.min, type = "response"))
+  
+  # Generate ROC
+  myroc_all <- roc(y_validation_all, pred_lasso_all)
+  # Plotting the ROC curve
+  par(bg = "#00000000")
+  plot(myroc_all)
+  # Save the plot
+  roc_plot_all[i] <- recordPlot()
+  
+  # extracting the Area Under the Curve, a measure of discrimination
+  lasso_auc_all[i] <- myroc_all$auc
+}
 
 ##############################################
 ##### With Literature Relevant variables #####
@@ -496,64 +522,193 @@ auc_lasso_all
 # Create a column for transfusion indicator
 data_use_lasso <- data_use %>%
   mutate(transfusion = if_else(
-      rowSums(
-        across(
-          c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
-            rbc_72_tot, ffp_72_tot, plt_72_tot, cryo_72_tot))) == 0, 0, 1
-    )
+    rowSums(
+      across(
+        c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
+          rbc_72_tot, ffp_72_tot, plt_72_tot, cryo_72_tot))) == 0, 0, 1
+  )
   ) %>% 
   select(Age, type, ECLS_CPB, ECLS_ECMO, cys_fib, Pre_Hb, Pre_Hct, Pre_Platelets, 
-    Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, Hypertension, preop_ecls, intraop_ecls, transfusion)
+         Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, Hypertension, preop_ecls, intraop_ecls, transfusion)
 
 # Removing NA row from data set (complete case analysis) - only 1 missing for Pre_PTT
 data_use_lasso_v1 <- na.omit(data_use_lasso)
 
-# cv for Lasso
-set.seed(789)
-train_indices <- sample(nrow(data_use_lasso_v1), round(nrow(data_use_lasso_v1) / 2))
+# Factor transfusion
+data_use_lasso_v1$transfusion <- as.factor(data_use_lasso_v1$transfusion)
 
-x_all <- model.matrix(transfusion ~ ., data_use_lasso_v1)
+# Create empty numeric vector store AUC values for each repeat
+lasso_auc <- numeric(length = length(repeats))
+# Create empty numeric vector to store minimum lambda values that maximize the AUC for each repeat
+lambda_min <- numeric(length = length(repeats))
+# Create empty list to store the coefficients
+coef <- list()
+# Create empty list to store lasso coefficient path plots for each repeat
+lasso_plot <- list()
+# Create empty list to store AUC plots for each repeat
+auc_plot <- list()
+# Create empty list to store ROC plots for each repeat
+roc_plot <- list()
 
-x_train <- x_all[train_indices, -1]
-x_validation <- x_all[-train_indices, -1]
+# Create a loop that completes 5 repeats of lasso regression, cross validation, 
+# testing on test set, and roc plot
+for (i in repeats) {
+  # Set seed for each iteration
+  set.seed(i)
+  
+  # Randomly select row indices for training set and split the data into training and testing sets
+  train_indices <- sample(nrow(data_use_lasso_v1), round(nrow(data_use_lasso_v1) / 2))
+  # Create a model matrix
+  x_all <- model.matrix(transfusion ~ ., data_use_lasso_v1)
+  # Select training set
+  x_train <- x_all[train_indices, -1]
+  # Select the rest as test set
+  x_validation <- x_all[-train_indices, -1]
+  # Select response set for training
+  y_train <- data_use_lasso_v1$transfusion[train_indices]
+  # Select response set for testing
+  y_validation <- data_use_lasso_v1$transfusion[-train_indices]
+  # Fit the lasso model
+  lasso_mod <- glmnet(x_train, y_train, alpha = 1, family = "binomial")
+  # Plot and store the lasso coefficient path plot
+  par(bg = "#00000000")
+  plot(lasso_mod, label = T, xvar = "lambda")
+  lasso_plot[[i]] <- recordPlot()
+  
+  # Conduct cross validation with AUC as the measure 
+  cv_lasso <- cv.glmnet(x_train, y_train, alpha = 1, 
+                        family = "binomial", type.measure = "auc", nfolds = 5)
+  # Plot the cross-validation error as a function of lambda
+  par(bg = "#00000000")
+  plot(cv_lasso)
+  # Store the plot
+  auc_plot[[i]] <- recordPlot()
+  # Extract and store the lambda value that maximizes AUC
+  lambda_min[i] <- cv_lasso$lambda.min
+  # Extract and store the relevant coefficients for the associated lambda value
+  coef[i] <- coef(cv_lasso, s = "lambda.min")
+  
+  # Testing in the test set. Validation.
+  pred_lasso <- as.numeric(
+    predict(
+      lasso_mod, 
+      newx = x_validation, 
+      s = cv_lasso$lambda.min, type = "response"))
+  
+  # Generate ROC
+  myroc <- roc(y_validation, pred_lasso)
+  # Plotting the ROC curve
+  par(bg = "#00000000")
+  plot(myroc)
+  # Save the plot
+  roc_plot[i] <- recordPlot()
+  
+  # extracting the Area Under the Curve, a measure of discrimination
+  lasso_auc[i] <- myroc$auc
+}
 
-y_train <- data_use_lasso_v1$transfusion[train_indices]
-y_validation <- data_use_lasso_v1$transfusion[-train_indices]
+#### Lasso Regression Combined Plots (All Variables) ####
 
-lasso_mod <- glmnet(x_train, y_train, alpha = 1, family = "binomial")
+# Combine five repetitions for each of the lasso coefficient, auc, and roc plots into their individual plots. Add labels and figure captions
+lasso_plots_all <- ggarrange(plotlist = lasso_plot_all,
+                             labels = c("A", "B", "C", "D", "E"),
+                             widths = c(1, 1, 1),
+                             heights = c(4, 4),
+                             ncol = 3,
+                             nrow = 2,
+                             align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure 4. Lasso coefficient paths for 5 repeated trials of Lasso regression. Variability in coefficient values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+lasso_plots_all
+ggsave("lasso_plots_all.png", lasso_plots_all, width = 18, height = 10, dpi = 300)
 
-cv_lasso <- cv.glmnet(x_train, y_train, alpha = 1, family = "binomial", type.measure = "auc", nfolds = 5)
 
-# AUC plot
-par(family = "serif", cex = 1.2, mgp = c(2.5, 1, 0)) 
-plot(cv_lasso)
-title(main = "MSE vs. Log(Lambda) with 5-Fold Cross-Validation", line = 2.5)
-mtext("Figure: Mean Squared Error (MSE) values across log(lambda) during 5-fold cross-validation. The dotted vertical line represents the optimal lambda minimizing the MSE.", 
-      side = 1, line = 4, cex = 1, col = "black")
-legend("bottomleft", legend = c("Optimal Lambda (Min MSE)"), 
-       col = c("red"), 
-       lty = c(2, 2), cex = 0.8,  bty = "n")
+auc_plots_all <- ggarrange(plotlist = auc_plot_all,
+                           labels = c("A", "B", "C", "D", "E"),
+                           widths = c(1, 1, 1),
+                           heights = c(1,1),
+                           ncol = 3,
+                           nrow = 2,
+                           align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure 5. AUC for 5 repeated trials of Lasso regression. Change in AUC values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+auc_plots_all
+ggsave("auc_plots_all.png", auc_plots_all, width = 18, height = 10, dpi = 300)
 
-lambda_min <- cv_lasso$lambda.min
-coef(cv_lasso, s = "lambda.min")
+roc_plots_all <- ggarrange(plotlist = roc_plot_all,
+                           labels = c("A", "B", "C", "D", "E"),
+                           widths = c(1, 1, 1),
+                           heights = c(4, 4),
+                           ncol = 2,
+                           nrow = 3) %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure 6. ROC curves for 5 repeated trials of Lasso regression. Performance of the classifier is shown for each of the 5 repetitions (A-E).", 
+      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+roc_plots_all
+ggsave("roc_plots_all.png", roc_plots_all, width = 18, height = 10, dpi = 300)
 
-# Train data
-pred_lasso <- as.numeric(
-  predict(
-    lasso_mod, 
-    newx = model.matrix(transfusion ~., data_use_lasso_v1)[-train_indices,-1], 
-    s = cv_lasso$lambda.min, type = "response"))
 
-# plotting the ROC curve
-myroc <- roc(transfusion ~ pred_lasso, 
-             data = data_use_lasso_v1[-train_indices,])
+#### Lasso Regression Combined Plots (Lit Review Variables) ####
 
-plot(myroc)
+# Combine five repetitions for each of the lasso coefficient, auc, and roc plots into their individual plots. Add labels and figure captions
+lasso_plots <- ggarrange(plotlist = lasso_plot,
+                         labels = c("A", "B", "C", "D", "E"),
+                         widths = c(1, 1, 1),
+                         heights = c(4, 4),
+                         ncol = 3,
+                         nrow = 2,
+                         align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure 4. Lasso coefficient paths for 5 repeated trials of Lasso regression. Variability in coefficient values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+lasso_plots
+ggsave("lasso_plots.png", lasso_plots, width = 18, height = 10, dpi = 300)
 
-# extracting the Area Under the Curve, a measure of discrimination
-auc_lasso <- myroc$auc
-auc_lasso
 
+auc_plots <- ggarrange(plotlist = auc_plot,
+                       labels = c("A", "B", "C", "D", "E"),
+                       widths = c(1, 1, 1),
+                       heights = c(1,1),
+                       ncol = 3,
+                       nrow = 2,
+                       align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure 5. AUC for 5 repeated trials of Lasso regression. Change in AUC values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+auc_plots
+ggsave("auc_plots.png", auc_plots, width = 18, height = 10, dpi = 300)
+
+roc_plots <- ggarrange(plotlist = roc_plot,
+                       labels = c("A", "B", "C", "D", "E"),
+                       widths = c(1, 1, 1),
+                       heights = c(4, 4),
+                       ncol = 2,
+                       nrow = 3) %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure 6. ROC curves for 5 repeated trials of Lasso regression. Performance of the classifier is shown for each of the 5 repetitions (A-E).", 
+      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+roc_plots
+ggsave("roc_plots.png", roc_plots, width = 18, height = 10, dpi = 300)
 
 
 #######################################
