@@ -605,13 +605,18 @@ for (i in 1:5) {
   pruned_cart_aucs <- c(pruned_cart_aucs, auc_pruned)
   
   # Plot and record the pruned tree
+  par(bg = "#00000000")
   plot(pruned_tree, main = paste("Pruned CART - Iteration", i))
   text(pruned_tree, pretty = 0)
   
   # Safely record the plot
   pruned_cart_plots[[i]] <- recordPlot()
   
+  # Plot and record the roc plot
+  par(bg = "#00000000")
   plot(roc_pruned)
+  
+  # Safely record the plot
   pruned_cart_roc[[i]] <- recordPlot()
 }
 
@@ -629,7 +634,11 @@ auc_df <- data.frame(
 print(auc_df)
 
 cart_plots1 <- ggarrange(plotlist = pruned_cart_plots,
-                         labels = c("A", "B", "C", "D", "E")
+                         labels = c("A", "B", "C", "D", "E"),
+                         widths = c(1, 1, 1),
+                         heights = c(4, 4),
+                         ncol = 3,
+                         nrow = 2
 ) %>%
   annotate_figure(
     bottom = text_grob(
@@ -639,7 +648,7 @@ cart_plots1 <- ggarrange(plotlist = pruned_cart_plots,
   )
 cart_plots1
 
-ggsave("CART_plots.png", cart_plots1, width = 12, height = 8, dpi = 300)
+ggsave("CART_plots.png", cart_plots1, width = 18, height = 10, dpi = 300)
 
 
 cart_plots2 <- ggarrange(plotlist = pruned_cart_roc,
@@ -657,7 +666,7 @@ cart_plots2 <- ggarrange(plotlist = pruned_cart_roc,
   )
 cart_plots2
 
-ggsave("CART_plots_2.png", cart_plots2, width = 12, height = 8, dpi = 300)
+ggsave("CART_plots_2.png", cart_plots2, width = 18, height = 10, dpi = 300)
 
 ##############################################
 ##### With Literature Relevant variables #####
@@ -704,13 +713,17 @@ for (i in 1:5) {
   pruned_lit_cart_aucs <- c(pruned_lit_cart_aucs, auc_pruned)
   
   # Plot and record the pruned tree
+  par(bg = "#00000000")
   plot(pruned_tree, main = paste("Pruned CART - Iteration", i))
   text(pruned_tree, pretty = 0)
   
   # Safely record the plot
   pruned_lit_cart_plots[[i]] <- recordPlot()
   
+  # Plot and record the roc plot
+  par(bg = "#00000000")
   plot(roc_pruned)
+  # Safely record the plot
   pruned_lit_cart_roc[[i]] <- recordPlot()
 }
 
@@ -729,7 +742,7 @@ print(lit_auc_df)
 
 cart_plots3 <- ggarrange(plotlist = pruned_lit_cart_plots,
                          labels = c("A", "B", "C", "D", "E"),
-                         widths = c(1,1),
+                         widths = c(1,1, 1),
                          heights = c(4, 4),
                          ncol = 3,
                          nrow = 2
@@ -743,12 +756,12 @@ cart_plots3 <- ggarrange(plotlist = pruned_lit_cart_plots,
   )
 cart_plots3
 
-ggsave("CART_plots_3.png", cart_plots3, width = 12, height = 8, dpi = 300)
+ggsave("CART_plots_3.png", cart_plots3, width = 18, height = 10, dpi = 300)
 
 
 cart_plots4 <- ggarrange(plotlist = pruned_lit_cart_roc,
                          labels = c("A", "B", "C", "D", "E"),
-                         widths = c(1, 1),
+                         widths = c(1, 1, 1),
                          heights = c(4, 4),
                          ncol = 3,
                          nrow = 2
@@ -761,7 +774,7 @@ cart_plots4 <- ggarrange(plotlist = pruned_lit_cart_roc,
   )
 cart_plots4
 
-ggsave("CART_plots_4.png", cart_plots4, width = 12, height = 8, dpi = 300)
+ggsave("CART_plots_4.png", cart_plots4, width = 18, height = 10, dpi = 300)
 
 
                               ##### QUESTION 2 STUFF #######
