@@ -475,6 +475,7 @@ for (i in repeats) {
   # Fit the lasso model
   lasso_mod_all <- glmnet(x_train_all, y_train_all, alpha = 1, family = "binomial")
   # Plot and store the lasso coefficient path plot
+  par(bg = "#00000000")
   plot(lasso_mod_all, label = T, xvar = "lambda")
   lasso_plot_all[[i]] <- recordPlot()
   
@@ -482,6 +483,7 @@ for (i in repeats) {
   cv_lasso_all <- cv.glmnet(x_train_all, y_train_all, alpha = 1, 
                             family = "binomial", type.measure = "auc", nfolds = 5)
   # Plot the cross-validation error as a function of lambda
+  par(bg = "#00000000")
   plot(cv_lasso_all)
   # Store the plot
   auc_plot_all[[i]] <- recordPlot()
@@ -500,6 +502,7 @@ for (i in repeats) {
   # Generate ROC
   myroc_all <- roc(y_validation_all, pred_lasso_all)
   # Plotting the ROC curve
+  par(bg = "#00000000")
   plot(myroc_all)
   # Save the plot
   roc_plot_all[i] <- recordPlot()
@@ -564,6 +567,7 @@ for (i in repeats) {
   # Fit the lasso model
   lasso_mod <- glmnet(x_train, y_train, alpha = 1, family = "binomial")
   # Plot and store the lasso coefficient path plot
+  par(bg = "#00000000")
   plot(lasso_mod, label = T, xvar = "lambda")
   lasso_plot[[i]] <- recordPlot()
   
@@ -571,6 +575,7 @@ for (i in repeats) {
   cv_lasso <- cv.glmnet(x_train, y_train, alpha = 1, 
                             family = "binomial", type.measure = "auc", nfolds = 5)
   # Plot the cross-validation error as a function of lambda
+  par(bg = "#00000000")
   plot(cv_lasso)
   # Store the plot
   auc_plot[[i]] <- recordPlot()
@@ -589,6 +594,7 @@ for (i in repeats) {
   # Generate ROC
   myroc <- roc(y_validation, pred_lasso)
   # Plotting the ROC curve
+  par(bg = "#00000000")
   plot(myroc)
   # Save the plot
   roc_plot[i] <- recordPlot()
@@ -597,7 +603,59 @@ for (i in repeats) {
   lasso_auc[i] <- myroc$auc
 }
 
-#### Lasso Regression Combined Plots ####
+#### Lasso Regression Combined Plots (All Variables) ####
+
+# Combine five repetitions for each of the lasso coefficient, auc, and roc plots into their individual plots. Add labels and figure captions
+lasso_plots_all <- ggarrange(plotlist = lasso_plot_all,
+                         labels = c("A", "B", "C", "D", "E"),
+                         widths = c(1, 1, 1),
+                         heights = c(4, 4),
+                         ncol = 3,
+                         nrow = 2,
+                         align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure 4. Lasso coefficient paths for 5 repeated trials of Lasso regression. Variability in coefficient values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+lasso_plots_all
+ggsave("lasso_plots_all.png", lasso_plots_all, width = 18, height = 10, dpi = 300)
+
+
+auc_plots_all <- ggarrange(plotlist = auc_plot_all,
+                       labels = c("A", "B", "C", "D", "E"),
+                       widths = c(1, 1, 1),
+                       heights = c(1,1),
+                       ncol = 3,
+                       nrow = 2,
+                       align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure 5. AUC for 5 repeated trials of Lasso regression. Change in AUC values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+auc_plots_all
+ggsave("auc_plots_all.png", auc_plots_all, width = 18, height = 10, dpi = 300)
+
+roc_plots_all <- ggarrange(plotlist = roc_plot_all,
+                       labels = c("A", "B", "C", "D", "E"),
+                       widths = c(1, 1, 1),
+                       heights = c(4, 4),
+                       ncol = 2,
+                       nrow = 3) %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure 6. ROC curves for 5 repeated trials of Lasso regression. Performance of the classifier is shown for each of the 5 repetitions (A-E).", 
+      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+roc_plots_all
+ggsave("roc_plots_all.png", roc_plots_all, width = 18, height = 10, dpi = 300)
+
+
+#### Lasso Regression Combined Plots (Lit Review Variables) ####
 
 # Combine five repetitions for each of the lasso coefficient, auc, and roc plots into their individual plots. Add labels and figure captions
 lasso_plots <- ggarrange(plotlist = lasso_plot,
@@ -609,39 +667,42 @@ lasso_plots <- ggarrange(plotlist = lasso_plot,
                          align = "hv") %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 4. Lasso coefficient paths for 5 repeated trials of Lasso regression. Variability in coefficient values as log lambda changes\nis shown for each of the 5 repetitions (A-E).", 
+      "Figure 4. Lasso coefficient paths for 5 repeated trials of Lasso regression. Variability in coefficient values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
       size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
-
-ggsave("lasso_plots.png", lasso_plots, width = 20, height = 10, dpi = 300)
+lasso_plots
+ggsave("lasso_plots.png", lasso_plots, width = 18, height = 10, dpi = 300)
 
 
 auc_plots <- ggarrange(plotlist = auc_plot,
                        labels = c("A", "B", "C", "D", "E"),
-                       widths = c(1, 1),
+                       widths = c(1, 1, 1),
                        heights = c(1,1),
                        ncol = 3,
-                       nrow = 2) %>%
+                       nrow = 2,
+                       align = "hv") %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 5. AUC for 5 repeated trials of Lasso regression. Change in AUC values as log lambda changes is shown for each of the\n5 repetitions (A-E).", 
+      "Figure 5. AUC for 5 repeated trials of Lasso regression. Change in AUC values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
       size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
 auc_plots
+ggsave("auc_plots.png", auc_plots, width = 18, height = 10, dpi = 300)
 
 roc_plots <- ggarrange(plotlist = roc_plot,
                        labels = c("A", "B", "C", "D", "E"),
-                       widths = c(1, 1),
+                       widths = c(1, 1, 1),
                        heights = c(4, 4),
                        ncol = 2,
                        nrow = 3) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 6. ROC curves for 5 repeated trials of Lasso regression. Performance of the classifier is shown for each of the \n5 repetitions (A-E).", 
+      "Figure 6. ROC curves for 5 repeated trials of Lasso regression. Performance of the classifier is shown for each of the 5 repetitions (A-E).", 
       size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
 roc_plots
+ggsave("roc_plots.png", roc_plots, width = 18, height = 10, dpi = 300)
 
