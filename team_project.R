@@ -515,6 +515,38 @@ for (i in repeats) {
   lasso_auc_all[i] <- myroc_all$auc
 }
 
+# Compile AUC's from the lasso regression of literature variables into a dataframe
+lasso_auc_df <- data.frame(
+  Model = rep("Lasso Regression", 5),
+  Vars = rep("All", 5),
+  Iteration = paste0("Iteration", 1:5),  
+  AUC = lasso_auc_all  # Actual AUC values
+)
+lasso_auc_df
+
+
+# Convert each matrix into a dataframe with Feature and Coefficient columns
+coef_dfs_all <- lapply(seq_along(coef_all), function(i) {
+  mat <- coef_all[[i]]
+  
+  # Convert matrix to a dataframe and extract non-zero coefficients
+  df <- as.data.frame(as.matrix(mat))
+  df$Feature <- rownames(df)
+  colnames(df) <- c(paste0("Repetition", i), "Feature")  # Rename coefficient column
+  
+  # Keep only non-zero coefficients
+  df <- df[df[[1]] != 0, , drop = FALSE]
+  df
+})
+
+# Merge all dataframes by "Feature", using full_join to align features across repetitions
+nonzero_coef <- Reduce(function(x, y) full_join(x, y, by = "Feature"), coef_dfs_all)
+
+# Replace NAs with 0 for features not present in certain repetitions
+nonzero_coef[is.na(nonzero_coef)] <- 0
+nonzero_coef
+
+
 ##############################################
 ##### With Literature Relevant variables #####
 ##############################################
@@ -606,6 +638,37 @@ for (i in repeats) {
   # extracting the Area Under the Curve, a measure of discrimination
   lasso_auc[i] <- myroc$auc
 }
+
+# Create a data frame with each model's AUCs as rows and iterations as columns
+lit_lasso_auc_df <- data.frame(
+  Model = rep("Lasso Regression", 5),
+  Vars = rep("Literature", 5),
+  Iteration = paste0("Iteration", 1:5),  
+  AUC = lasso_auc  # Actual AUC values
+)
+lit_lasso_auc_df
+
+
+# Convert each matrix into a dataframe with Feature and Coefficient columns
+coef_dfs <- lapply(seq_along(coef), function(i) {
+  mat <- coef[[i]]
+  
+  # Convert matrix to a dataframe and extract non-zero coefficients
+  df <- as.data.frame(as.matrix(mat))
+  df$Feature <- rownames(df)
+  colnames(df) <- c(paste0("Repetition", i), "Feature")  # Rename coefficient column
+  
+  # Keep only non-zero coefficients
+  df <- df[df[[1]] != 0, , drop = FALSE]
+  df
+})
+
+# Merge all dataframes by "Feature", using full_join to align features across repetitions
+nonzero_coef_lit <- Reduce(function(x, y) full_join(x, y, by = "Feature"), coef_dfs)
+
+# Replace NAs with 0 for features not present in certain repetitions
+nonzero_coef_lit[is.na(nonzero_coef_lit)] <- 0
+nonzero_coef_lit
 
 #### Lasso Regression Combined Plots (All Variables) ####
 
@@ -777,16 +840,12 @@ for (i in 1:5) {
 
 # Create a data frame with each model's AUCs as rows and iterations as columns
 auc_df <- data.frame(
-  Model = c("Pruned CART"),
-  Iteration1 = c(pruned_cart_aucs[1]),
-  Iteration2 = c(pruned_cart_aucs[2]),
-  Iteration3 = c(pruned_cart_aucs[3]),
-  Iteration4 = c(pruned_cart_aucs[4]),
-  Iteration5 = c(pruned_cart_aucs[5]),
-  Average = c(mean(pruned_cart_aucs))
+  Model = rep("Pruned CART", 5),
+  Vars = rep("All", 5),
+  Iteration = paste0("Iteration", 1:5),  
+  AUC = pruned_cart_aucs  # Actual AUC values
 )
-
-print(auc_df)
+auc_df
 
 cart_plots1 <- ggarrange(plotlist = pruned_cart_plots,
                          labels = c("A", "B", "C", "D", "E"),
@@ -884,16 +943,12 @@ for (i in 1:5) {
 
 # Create a data frame with each model's AUCs as rows and iterations as columns
 lit_auc_df <- data.frame(
-  Model = c("Pruned CART"),
-  Iteration1 = c(pruned_lit_cart_aucs[1]),
-  Iteration2 = c(pruned_lit_cart_aucs[2]),
-  Iteration3 = c(pruned_lit_cart_aucs[3]),
-  Iteration4 = c(pruned_lit_cart_aucs[4]),
-  Iteration5 = c(pruned_lit_cart_aucs[5]),
-  Average = c(mean(pruned_lit_cart_aucs))
+  Model = rep("Pruned CART", 5),
+  Vars = rep("Literature", 5),
+  Iteration = paste0("Iteration", 1:5),  
+  AUC = pruned_lit_cart_aucs  # Actual AUC values
 )
-
-print(lit_auc_df)
+lit_auc_df
 
 cart_plots3 <- ggarrange(plotlist = pruned_lit_cart_plots,
                          labels = c("A", "B", "C", "D", "E"),
@@ -930,6 +985,22 @@ cart_plots4 <- ggarrange(plotlist = pruned_lit_cart_roc,
 cart_plots4
 
 ggsave("CART_plots_4.png", cart_plots4, width = 18, height = 10, dpi = 300)
+
+### Convert all AUCs from lasso regression and pruned trees together ###
+auc_combined_df <- rbind(lasso_auc_df, lit_lasso_auc_df, auc_df, lit_auc_df)
+auc_combined_df
+
+### Calculate the average of AUCs ###
+auc_avg_df <- auc_combined_df %>%
+  group_by(Model, Vars) %>%
+  summarise(
+    mean_auc <- mean(AUC)
+    ) %>%
+  ungroup() %>%
+  # Rename column
+  rename(
+    mean_auc = "mean_auc <- mean(AUC)"
+  )
 
 
                               ##### QUESTION 2 STUFF #######
