@@ -227,11 +227,12 @@ plot(sf3, xlab = "Time (days)", ylab="Survival", conf.int = 0.95) ## Add a confi
 # see plot for where 0.5 is or something if we want to include this graph we can 
 
 # Kaplan-Meier Curve
-plot(sf3,xscale = 365.25, xlab = "Time (days)", ylab="Survival Probability", col=1:2) 
+plot(sf3,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", col=1:2) 
 legend("topright",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:3) 
 
 # Cox model 
-coxmod3 <- coxph(Surv(time_death, has_value==1) ~ transfusion+intraop_ecls+intra_plasma+intra_packed_cells+Intra_Platelets+Intra_Cryoprecipitate+icu_stay, data=data_with_dead)
+coxmod3 <- coxph(Surv(time_death, has_value==1) ~ gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
+                 + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot, data=data_with_dead)
 summary(coxmod3)
 
 # do log rank test as well to compare transfusion or not transfusion 
@@ -239,8 +240,28 @@ LR_test3 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=data_wit
 LR_test3
 
 ####################################
+#####     WILCOXON TEST CAUSE NOT NORMALLY DISTRIBUTED    #####
+####################################
+
+# See EDA that hospital LOS and ICU LOS is not normally distributed
+# therefore t test and linear regression will not suffice as the assumptions are not met
+# since we are writing a report though we could include the linear regression stuff in the appendix but if we dont want to we just have to delete it !!!
+attach(data_with_dead)
+
+# ICU stay 
+boxplot(icu_stay~transfusion) # this is really ugly !!!
+wilcox.test(icu_stay~transfusion)
+
+# hospital stay
+boxplot(HOSPITAL_LOS~transfusion) # this is really ugly !!!
+wilcox.test(HOSPITAL_LOS~transfusion)
+
+detach(data_with_dead)
+
+####################################
 #####     LINEAR REGRESSION    #####
 ####################################
+### WE CANNOT DO THIS THOUGH BECAUSE THE DATA IS NOT NORMALLY DISTRIBUTED !!!
 # Testing for the 3 outcomes -> ICU stay, Hospital stay, and time to death 
 # Bonferonni needed*** !!!
 
@@ -301,7 +322,7 @@ plot(sf2, xlab = "Time (days)", ylab="Survival", conf.int = 0.95) ## Add a confi
 # see plot for where 0.5 is or something if we want to include this graph we can 
 
 # Kaplan-Meier Curve
-plot(sf2,xscale = 365.25, xlab = "Time (days)", ylab="Survival Probability", col=1:3) 
+plot(sf2,xscale = 365.25, xlab = "Time (days)", ylab="Survival Probability", col=1:3)   
 legend("topright",legend = c("Short", "Medium", "Long"),lty = 1, col = 1:3) 
 
 
@@ -399,7 +420,7 @@ title(main = "AUC Cross-Validation Curve for Lasso Regression", line = 3)
 
 lambda_min <- cv_lasso$lambda.min
 coef(cv_lasso, s = "lambda.min")
-
+ 
 
 
 
