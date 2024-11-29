@@ -1043,7 +1043,7 @@ ggplot(data_with_dead, aes(x = factor(has_value))) +
 # time to death - only for those who died 
 ggplot(data_with_dead, aes(x = time_death)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Patient Time to Death", x = "Time to Death", y = "Frequency")
+  labs(title = "Histogram of Patient Time to Death", x = "Time to Death (days)", y = "Frequency")
 
 # time_death has a lot of missingness since DEATH_DATE has a lot of missingness
 table(data_with_dead$time_death)
@@ -1057,7 +1057,7 @@ data_with_dead <- data_with_dead %>%
 # time to death - including censored at 365 days
 ggplot(data_with_dead, aes(x = time_death)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Patient Time to Death", x = "Time to Death", y = "Frequency")
+  labs(title = "Histogram of Patient Time to Death", x = "Time to Death (days)", y = "Frequency")
 
 
 # Ensure all variables that will be included in the data set for the analyses are relevant 
@@ -1107,6 +1107,7 @@ LR_test3
 coxmod3 <- coxph(Surv(time_death, has_value==1) ~ transfusion + gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
                  + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot, data=data_with_dead)
 summary(coxmod3)
+## SEE LIT -> HYPERTENSION AND ANEMIA 
 
 ##### Stratify by if they got a transfusion #####
 ### MAIN ANALYSIS !!!
