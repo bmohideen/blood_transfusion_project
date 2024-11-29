@@ -1034,6 +1034,11 @@ data_with_dead <- data_with_dead %>%
     time_death = as.numeric(difftime(DEATH_DATE, or_date, units = "days"))
   )
 
+# since censoring occurs at one year and some of the pateints die after a year include only those who died 
+# during the first year in the analysis 
+sup_dwd <- data_with_dead <- data_with_dead %>%
+  mutate(
+
 # add the new variables to the EDA -> for results 
 # Patient deaths (from has_value)
 ggplot(data_with_dead, aes(x = factor(has_value))) +
