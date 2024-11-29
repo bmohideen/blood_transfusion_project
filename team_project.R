@@ -509,7 +509,7 @@ for (i in repeats) {
   par(bg = "#00000000")
   plot(myroc_all)
   # Save the plot
-  roc_plot_all[i] <- recordPlot()
+  roc_plot_all[[i]] <- recordPlot()
   
   # extracting the Area Under the Curve, a measure of discrimination
   lasso_auc_all[i] <- myroc_all$auc
@@ -633,7 +633,7 @@ for (i in repeats) {
   par(bg = "#00000000")
   plot(myroc)
   # Save the plot
-  roc_plot[i] <- recordPlot()
+  roc_plot[[i]] <- recordPlot()
   
   # extracting the Area Under the Curve, a measure of discrimination
   lasso_auc[i] <- myroc$auc
@@ -847,6 +847,7 @@ auc_df <- data.frame(
 )
 auc_df
 
+# Combine five repetitions for each of the pruned CART and auc plots into their individual plots. Add labels and figure captions
 cart_plots1 <- ggarrange(plotlist = pruned_cart_plots,
                          labels = c("A", "B", "C", "D", "E"),
                          widths = c(1, 1, 1),
@@ -856,7 +857,7 @@ cart_plots1 <- ggarrange(plotlist = pruned_cart_plots,
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 7. pruned (A, B, C, D, E) CART trees for repeated trials.", 
+      "Figure 7. Pruned CART trees for repeated trials. Relevant characteristics/factors and their threshold/categories are shown for each of the 5 repetitions (A-E).", 
       size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -874,7 +875,7 @@ cart_plots2 <- ggarrange(plotlist = pruned_cart_roc,
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 7. pruned (A, B, C, D, E) tree ROC curves for repeated trials.", 
+      "Figure 8. ROC curves for 5 repeated trials of CART. Performance of the classifier is shown for each of the 5 repetitions (A-E).", 
       size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -950,6 +951,7 @@ lit_auc_df <- data.frame(
 )
 lit_auc_df
 
+# Combine five repetitions for each of the pruned CART and auc plots into their individual plots. Add labels and figure captions
 cart_plots3 <- ggarrange(plotlist = pruned_lit_cart_plots,
                          labels = c("A", "B", "C", "D", "E"),
                          widths = c(1,1, 1),
@@ -960,7 +962,7 @@ cart_plots3 <- ggarrange(plotlist = pruned_lit_cart_plots,
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 7. pruned (A, B, C, D, E) CART trees for repeated trials.", 
+      "Figure 9. Pruned CART trees for repeated trials. Relevant literature characteristics/factors and their threshold/categories are shown for each of the 5 repetitions (A-E).", 
       size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -978,7 +980,7 @@ cart_plots4 <- ggarrange(plotlist = pruned_lit_cart_roc,
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 7. pruned (A, B, C, D, E) tree ROC curves for literature repeated trials.", 
+      "Figure 10. ROC curves for 5 repeated trials of CART. Performance of the classifier is shown for each of the 5 repetitions (A-E).", 
       size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -1002,6 +1004,8 @@ auc_avg_df <- auc_combined_df %>%
     mean_auc = "mean_auc <- mean(AUC)"
   )
 
+# View the averaged AUC scores for all the models
+auc_avg_df
 
                               ##### QUESTION 2 STUFF #######
 ####################################
