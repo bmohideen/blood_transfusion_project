@@ -1007,15 +1007,11 @@ auc_avg_df <- auc_combined_df %>%
 # View the averaged AUC scores for all the models
 auc_avg_df
 
-                              ##### QUESTION 2 STUFF #######
-####################################
-#####     Some stuff     #####
-####################################
+##### QUESTION 2  #######
 # Anything that has !!! means it needs review (by group)
 # In conjunction with the above, what is the impact of transfusion on patient outcomes, including mortality? #
 
-# get rid of pateints who did not get transfusion
-# 109 did and 83 didnt 
+# Modify data_use to include the transfusion binary indicator (as done prevoiusly for lasso regression)
 data_use <- data_use %>%
   mutate(transfusion = if_else(
     rowSums(across(c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
@@ -1023,74 +1019,94 @@ data_use <- data_use %>%
   ))
 
 
-#####  Report the Median Time Until Death #####
-# create a death variable in data_use 
+# create a death variable in data_use and a new data frame for the analysis
+# the death variable indicates if DEATH_DATE has a value, where 1 indicates the patinet is known to have died and 0 indicates they are censored
 data_with_dead <- data_use %>%
   mutate(has_value = if_else(!is.na(data_use$DEATH_DATE), "1", "0"))
 # convert to numeric
 data_with_dead$has_value <- as.numeric(data_with_dead$has_value)
 
+# convert both death date and OR date into POSIXct form
 data_with_dead <- data_with_dead %>%
   mutate(
-    DEATH_DATE = as.POSIXct(DEATH_DATE, format = "%d-%b-%Y"),
-    or_date = as.POSIXct(or_date, format = "%Y-%m-%d %H:%M:%S"),  # Adjust if needed
+    DEATH_DATE = as.POSIXct(DEATH_DATE, format = "%d-%b-%Y"), #convert to POSIX form
+    or_date = as.POSIXct(or_date, format = "%Y-%m-%d %H:%M:%S"), #convert to POSIX form
     time_death = as.numeric(difftime(DEATH_DATE, or_date, units = "days"))
   )
 
+# add the new variables to the EDA -> for results 
+# Patient deaths (from has_value)
+ggplot(data_with_dead, aes(x = factor(has_value))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Known Patients Deaths", x = "Patient Death (1 = Yes, 0 = No)", y = "Count")
+
+# time to death - only for those who died 
+ggplot(data_with_dead, aes(x = time_death)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Patient Time to Death", x = "Time to Death", y = "Frequency")
+
 # time_death has a lot of missingness since DEATH_DATE has a lot of missingness
-# therefore if there is no DEATH_DATE assume that the patient was alive after a year so change the NA to 365 -> censoring date !!!
-### NOTE YOU IDIOT -> CHECK CRYSTALS QUESTION IN THE DISCUSSION TO SEE IF YOU CAN DO THIS !!!
 table(data_with_dead$time_death)
 
+# therefore if there is no DEATH_DATE assume that the patient was alive after a year so change the NA to 365 (since the last recorded follow up in the dataset was after 12 months)
+# censored patients given value of 365
 data_with_dead <- data_with_dead %>%
   mutate(
     time_death = if_else(is.na(time_death), 365, time_death))
 
-summary(data_with_dead)
-# see where the NAs are 
-colSums(is.na(data_with_dead))
+# time to death - including censored at 365 days
+ggplot(data_with_dead, aes(x = time_death)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Patient Time to Death", x = "Time to Death", y = "Frequency")
 
 
-# Wow! so much missingness and so many columns we may not need! clean up!!!
-# copied from main to get rid of stuff that may not be needed -> get rid of some stuff from original data set that is cofounding or 
-# high missingness (>30% or something)
-#### NOTE HERE THAT I WILL NEED TO USE THE IMPUTED DATA SET FROM MAIN !!!
-### ALSO CHECK IF THE VARIABLES INCLUDED ARE RIGHT/EVERYTHING WE NEED WITH GROUP !!!
-# removed study Id and tx_db_id
-# removed or_date and DEATH_DATE 
-# remove due to high missingness: pre_fibrinogen, rbc_0_24, rbc_24_48, rbc_48_72, ffp_0_24, ffp_24_48, ffp_48_72, plt_0_24, plt_24_48, plt_48_72
-# cryo_0_24, cryo_24_48, cyro_48_72
+# Ensure all variables that will be included in the data set for the analyses are relevant 
+# removed study Id and tx_db_id -> just identifiers
+# removed or_date and DEATH_DATE -> represented in time_death
+# remove due to high missingness: pre_fibrinogen, rbc_0_24, rbc_24_48, rbc_48_72, ffp_0_24, ffp_24_48, ffp_48_72, plt_0_24, plt_24_48, plt_48_72, cryo_0_24, cryo_24_48, cyro_48_72
+# SHOULD I ALSO REMOVE ALIVE 30 DAYS, 90 DAYS and 1 YEAR? !!!
 data_with_dead <- data_with_dead %>%
-   select(Type, or_date, gender_male, aat_deficiency, cys_fib, ipah, 
+  select(Type, or_date, gender_male, aat_deficiency, cys_fib, ipah, 
          ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud, renal_fail, stroke, 
          liver_disease, thyroid_disease, first_transplant, redo_transplant, evlp, preop_ecls,
-        las, Pre_Hb, Pre_Hct, Pre_Platelets, Pre_PT, Pre_INR, Pre_PTT, Pre_Fibrinogen, Pre_Creatinine,
+         las, Pre_Hb, Pre_Hct, Pre_Platelets, Pre_PT, Pre_INR, Pre_PTT, Pre_Fibrinogen, Pre_Creatinine,
          intraop_ecls, ECLS_ECMO, ECLS_CPB, intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
-        icu_stay, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
+         icu_stay, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
          rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot,
          tot_24_rbc, massive_transfusion, Age, BMI, time_death, has_value, transfusion) %>%
-  mutate(type = if_else(Type == "Bilateral", "Double", "Single"))
+  mutate(type = if_else(Type == "Bilateral", "Double", "Single")) # modifying type to single or double transplant
 
-# Use full data set (data_use) 
+# add the library required for the survival analysis 
 library(survival)
-# delete/dont include these since they are not stratified? !!!
+# create an unstratified Kaplan-Meier estimate 
 sf1 <- survfit(Surv(time_death, has_value==1)~1, data=data_with_dead)
 
-# add a plot
-plot(sf1, xlab = "Time (days)", ylab="Survival", conf.int = 0.95) ## Add a confidence interval 
-
-# see plot for where 0.5 is or something if we want to include this graph we can 
-
 # Kaplan-Meier Curve
-plot(sf1,xscale = 365.25, xlab = "Time (days)", ylab="Survival Probability") 
+plot(sf1,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95) 
+
+# create a stratified surivival anlysis - CAN I OR SHOULD I DO THIS !!! probably cause log rank is looking at this right 
+sf3 <- survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead)
+
+# Kaplan-Meier Curve - UGLY PROBABLY DELETE !!!
+plot(sf3,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95, col=1:2, fun = "S") 
+legend("topright",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:3)
+
+# Preform the log-rank test
+# must first check the proportional hazard assumption using function set to "cloglog"
+# plot a cloglog plot against log(t)
+plot(survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead), fun = "cloglog", col=1:2, xlab = "Time (days)", ylab="log[log(Survival probability)]")
 # add a legend with col to distinguish levels
+legend("topleft",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
 
-# do more
-# Make a Cox PH model
-coxmod <- coxph(Surv(time_death, has_value==1) ~ 1+intraop_ecls+intra_plasma+intra_packed_cells+Intra_Platelets+Intra_Cryoprecipitate+icu_stay, data=data_with_dead)
+# Run the log-rank test # CRYSTAL GOT A P OF 0.5 !!! a p value of 1 is the max !!!
+LR_test3 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=data_with_dead)
+LR_test3
 
-# Create a summary 
-summary(coxmod)
+# Run a Cox proportional hazard model including variables related to the patient (orange) and blood transfused into the patients and their 72 hour stats (yellow)
+# Should i be including like a LOT of other things !!! -> do i check for multicollinearity?
+coxmod3 <- coxph(Surv(time_death, has_value==1) ~ transfusion + gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
+                 + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot, data=data_with_dead)
+summary(coxmod3)
 
 ##### Stratify by if they got a transfusion #####
 ### MAIN ANALYSIS !!!
@@ -1164,8 +1180,8 @@ summary(model_icu)
 
 ### Hospital stay 
 model_hs <- lm(HOSPITAL_LOS ~ gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
-                + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot,
-                data = data_with_dead)
+               + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot,
+               data = data_with_dead)
 summary(model_hs)
 
 ### Time to death -> small number of obs... is this okay? would mess up the pred_num stuff... maybe not?
