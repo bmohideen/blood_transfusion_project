@@ -10,6 +10,7 @@ library(tree)
 library(mice)
 library(ggpubr)
 library(grid)
+library(funModeling)
 
 
 #########################################
@@ -90,6 +91,10 @@ data_use <- data %>%
 
 # structure
 str(data_use)
+
+# funmodelling?
+freq(data_use) 
+plot_num(data_use[,-1])
 
 
 # Converting to Proper Binary structure (TRUE/Y = 1, FALSE/N = 0) 
