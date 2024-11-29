@@ -1012,15 +1012,11 @@ auc_avg_df <- auc_combined_df %>%
 # View the averaged AUC scores for all the models
 auc_avg_df
 
-                              ##### QUESTION 2 STUFF #######
-####################################
-#####     Some stuff     #####
-####################################
+                              ##### QUESTION 2  #######
 # Anything that has !!! means it needs review (by group)
 # In conjunction with the above, what is the impact of transfusion on patient outcomes, including mortality? #
 
-# get rid of pateints who did not get transfusion
-# 109 did and 83 didnt 
+# Modify data_use to include the transfusion binary indicator (as done prevoiusly for lasso regression)
 data_use <- data_use %>%
   mutate(transfusion = if_else(
     rowSums(across(c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
@@ -1028,17 +1024,18 @@ data_use <- data_use %>%
   ))
 
 
-#####  Report the Median Time Until Death #####
-# create a death variable in data_use 
+# create a death variable in data_use and a new data frame for the analysis
+# the death variable indicates if DEATH_DATE has a value, where 1 indicates the patinet is known to have died and 0 indicates they are censored
 data_with_dead <- data_use %>%
   mutate(has_value = if_else(!is.na(data_use$DEATH_DATE), "1", "0"))
 # convert to numeric
 data_with_dead$has_value <- as.numeric(data_with_dead$has_value)
 
+# convert both death date and OR date into POSIXct form
 data_with_dead <- data_with_dead %>%
   mutate(
-    DEATH_DATE = as.POSIXct(DEATH_DATE, format = "%d-%b-%Y"),
-    or_date = as.POSIXct(or_date, format = "%Y-%m-%d %H:%M:%S"),  # Adjust if needed
+    DEATH_DATE = as.POSIXct(DEATH_DATE, format = "%d-%b-%Y"), #convert to POSIX form
+    or_date = as.POSIXct(or_date, format = "%Y-%m-%d %H:%M:%S"), #convert to POSIX form
     time_death = as.numeric(difftime(DEATH_DATE, or_date, units = "days"))
   )
 
@@ -1067,18 +1064,12 @@ ggplot(data_with_dead, aes(x = time_death)) +
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Patient Time to Death", x = "Time to Death", y = "Frequency")
 
-# see where the NAs are 
-colSums(is.na(data_with_dead))
 
-# Wow! so much missingness and so many columns we may not need! clean up!!!
-# copied from main to get rid of stuff that may not be needed -> get rid of some stuff from original data set that is cofounding or 
-# high missingness (>30% or something)
-#### NOTE HERE THAT I WILL NEED TO USE THE IMPUTED DATA SET FROM MAIN !!!
-### ALSO CHECK IF THE VARIABLES INCLUDED ARE RIGHT/EVERYTHING WE NEED WITH GROUP !!!
-# removed study Id and tx_db_id
-# removed or_date and DEATH_DATE 
-# remove due to high missingness: pre_fibrinogen, rbc_0_24, rbc_24_48, rbc_48_72, ffp_0_24, ffp_24_48, ffp_48_72, plt_0_24, plt_24_48, plt_48_72
-# cryo_0_24, cryo_24_48, cyro_48_72
+# Ensure all variables that will be included in the data set for the analyses are relevant 
+# removed study Id and tx_db_id -> just identifiers
+# removed or_date and DEATH_DATE -> represented in time_death
+# remove due to high missingness: pre_fibrinogen, rbc_0_24, rbc_24_48, rbc_48_72, ffp_0_24, ffp_24_48, ffp_48_72, plt_0_24, plt_24_48, plt_48_72, cryo_0_24, cryo_24_48, cyro_48_72
+# SHOULD I ALSO REMOVE ALIVE 30 DAYS, 90 DAYS and 1 YEAR? !!!
 data_with_dead <- data_with_dead %>%
    select(Type, or_date, gender_male, aat_deficiency, cys_fib, ipah, 
          ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud, renal_fail, stroke, 
@@ -1088,11 +1079,11 @@ data_with_dead <- data_with_dead %>%
         icu_stay, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
          rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot,
          tot_24_rbc, massive_transfusion, Age, BMI, time_death, has_value, transfusion) %>%
-  mutate(type = if_else(Type == "Bilateral", "Double", "Single"))
+  mutate(type = if_else(Type == "Bilateral", "Double", "Single")) # modifying type to single or double transplant
 
-# Use full data set (data_use) 
+# add the library required for the survival analysis 
 library(survival)
-# create an unstratified survival analysis 
+# create an unstratified Kaplan-Meier estimate 
 sf1 <- survfit(Surv(time_death, has_value==1)~1, data=data_with_dead)
 
 # Kaplan-Meier Curve
@@ -1108,7 +1099,7 @@ legend("topright",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:3
 # Preform the log-rank test
 # must first check the proportional hazard assumption using function set to "cloglog"
 # plot a cloglog plot against log(t)
-plot(survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead), fun = "cloglog", col=1:2, xlab = "log[log(Survival probability)", ylab="Time")
+plot(survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead), fun = "cloglog", col=1:2, xlab = "Time (days)", ylab="log[log(Survival probability)]")
 # add a legend with col to distinguish levels
 legend("topleft",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
 
@@ -1116,12 +1107,11 @@ legend("topleft",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
 LR_test3 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=data_with_dead)
 LR_test3
 
-# do more
-# Make a Cox PH model -> including variables related to the blood transfused into the patients and their ICU stay !!! for some reason
-coxmod <- coxph(Surv(time_death, has_value==1) ~ 1+intraop_ecls+intra_plasma+intra_packed_cells+Intra_Platelets+Intra_Cryoprecipitate+icu_stay, data=data_with_dead)
-
-# Create a summary 
-summary(coxmod)
+# Run a Cox proportional hazard model including variables related to the patient (orange) and blood transfused into the patients and their 72 hour stats (yellow)
+# Should i be including like a LOT of other things !!! -> do i check for multicollinearity?
+coxmod3 <- coxph(Surv(time_death, has_value==1) ~ transfusion + gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
+                 + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot, data=data_with_dead)
+summary(coxmod3)
 
 ##### Stratify by if they got a transfusion #####
 ### MAIN ANALYSIS !!!
