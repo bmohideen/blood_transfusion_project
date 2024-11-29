@@ -1042,19 +1042,33 @@ data_with_dead <- data_with_dead %>%
     time_death = as.numeric(difftime(DEATH_DATE, or_date, units = "days"))
   )
 
+# add the new variables to the EDA -> for results 
+# Patient deaths (from has_value)
+ggplot(data_with_dead, aes(x = factor(has_value))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Bar Plot of Known Patients Deaths", x = "Patient Death (1 = Yes, 0 = No)", y = "Count")
+
+# time to death - only for those who died 
+ggplot(data_with_dead, aes(x = time_death)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Patient Time to Death", x = "Time to Death", y = "Frequency")
+
 # time_death has a lot of missingness since DEATH_DATE has a lot of missingness
-# therefore if there is no DEATH_DATE assume that the patient was alive after a year so change the NA to 365 -> censoring date !!!
-### NOTE YOU IDIOT -> CHECK CRYSTALS QUESTION IN THE DISCUSSION TO SEE IF YOU CAN DO THIS !!!
 table(data_with_dead$time_death)
 
+# therefore if there is no DEATH_DATE assume that the patient was alive after a year so change the NA to 365 (since the last recorded follow up in the dataset was after 12 months)
+# censored patients given value of 365
 data_with_dead <- data_with_dead %>%
   mutate(
     time_death = if_else(is.na(time_death), 365, time_death))
 
-summary(data_with_dead)
+# time to death - including censored at 365 days
+ggplot(data_with_dead, aes(x = time_death)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Patient Time to Death", x = "Time to Death", y = "Frequency")
+
 # see where the NAs are 
 colSums(is.na(data_with_dead))
-
 
 # Wow! so much missingness and so many columns we may not need! clean up!!!
 # copied from main to get rid of stuff that may not be needed -> get rid of some stuff from original data set that is cofounding or 
@@ -1078,20 +1092,32 @@ data_with_dead <- data_with_dead %>%
 
 # Use full data set (data_use) 
 library(survival)
-# delete/dont include these since they are not stratified? !!!
+# create an unstratified survival analysis 
 sf1 <- survfit(Surv(time_death, has_value==1)~1, data=data_with_dead)
 
-# add a plot
-plot(sf1, xlab = "Time (days)", ylab="Survival", conf.int = 0.95) ## Add a confidence interval 
-
-# see plot for where 0.5 is or something if we want to include this graph we can 
-
 # Kaplan-Meier Curve
-plot(sf1,xscale = 365.25, xlab = "Time (days)", ylab="Survival Probability") 
+plot(sf1,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95) 
+
+# create a stratified surivival anlysis - CAN I OR SHOULD I DO THIS !!! probably cause log rank is looking at this right 
+sf3 <- survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead)
+
+# Kaplan-Meier Curve - UGLY PROBABLY DELETE !!!
+plot(sf3,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95, col=1:2, fun = "S") 
+legend("topright",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:3)
+
+# Preform the log-rank test
+# must first check the proportional hazard assumption using function set to "cloglog"
+# plot a cloglog plot against log(t)
+plot(survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead), fun = "cloglog", col=1:2, xlab = "log[log(Survival probability)", ylab="Time")
 # add a legend with col to distinguish levels
+legend("topleft",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
+
+# Run the log-rank test # CRYSTAL GOT A P OF 0.5 !!! a p value of 1 is the max !!!
+LR_test3 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=data_with_dead)
+LR_test3
 
 # do more
-# Make a Cox PH model
+# Make a Cox PH model -> including variables related to the blood transfused into the patients and their ICU stay !!! for some reason
 coxmod <- coxph(Surv(time_death, has_value==1) ~ 1+intraop_ecls+intra_plasma+intra_packed_cells+Intra_Platelets+Intra_Cryoprecipitate+icu_stay, data=data_with_dead)
 
 # Create a summary 
