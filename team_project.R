@@ -772,7 +772,7 @@ roc_plots <- ggarrange(plotlist = roc_plot,
 roc_plots
 ggsave("roc_plots.png", roc_plots, width = 12, height = 8, dpi = 300)
 
-#### LASSO Regression: Amount of Transfusion ####
+#### Lasso Regression: Amount of Transfusion ####
 
 # adding new columns with sum of 24 hour + intraoperative values
 data_use_with_sums <- data_use %>%
