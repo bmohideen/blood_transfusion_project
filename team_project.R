@@ -1148,7 +1148,7 @@ s1 <- survfit(Surv(time_death, has_value==1)~1, data=sup_dwd)
 plot(s1,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95) 
 
 # create a stratified surivival anlysis - vsiual for log rank test
-s3 <- survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead)
+s3 <- survfit(Surv(time_death, has_value==1)~transfusion, data=sup_dwd)
 
 # Kaplan-Meier Curve 
 plot(s3,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95, col=1:2, fun = "S") 
@@ -1172,7 +1172,7 @@ LR_test1
 ## any more may be subject to overfitting or estimates that are highly sensitive to small changes 
 ### DO I NEED TO CHECK FOR COLLINEARITY?? !!!
 # Run a Cox proportional hazard model including variables found to be relevant in Question 1 Lasso regression (all) - see report !!! 
-coxmod1 <- coxph(Surv(time_death, has_value==1) ~ transfusion + Type + ipah + pulm_other + Hypertension + t2d + gerd_pud + stroke + 
+coxmod1 <- coxph(Surv(time_death, has_value==1) ~ transfusion + Type + ipah + pulm_other + Hypertension + t2d + gerd_pud + stroke 
                    + Pre_Hb + Pre_Platelets + Pre_INR + redo_transplant + intraop_ecls + las, data=sup_dwd)
 summary(coxmod1)
 ## SEE LIT -> Hmm concerning cause a nothing seems to be relevant 
@@ -1194,6 +1194,9 @@ coxmod4 <- coxph(Surv(time_death, has_value==1) ~ transfusion + gender_male + Ag
                  + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot  + Type + ipah + pulm_other + Hypertension + t2d + gerd_pud + stroke + 
                    + Pre_Hb + Pre_Platelets + Pre_INR + redo_transplant + intraop_ecls + las ,data=sup_dwd)
 summary(coxmod4)
+
+library(car)
+vif(coxmod4)
 # test proportional hazard
 cox.zph(coxmod4)
 
@@ -1203,6 +1206,22 @@ coxmod5 <- coxph(Surv(time_death, has_value==1) ~ transfusion + intraop_ecls + P
 summary(coxmod5)
 # test proportional hazard
 cox.zph(coxmod5)
+
+coxmod6 <- coxph(Surv(time_death, has_value==1) ~ transfusion,data=sup_dwd)
+summary(coxmod6)
+# test proportional hazard
+cox.zph(coxmod6)
+
+coxmod7 <- coxph(Surv(time_death, has_value==1) ~ transfusion + intraop_ecls + Pre_Hb + Pre_Platelets + redo_transplant,data=sup_dwd)
+summary(coxmod7)
+# test proportional hazard
+cox.zph(coxmod7)
+
+coxmod8<- coxph(Surv(time_death, has_value==1) ~ transfusion + intraop_ecls + Pre_Hb + Pre_Platelets ,data=sup_dwd)
+summary(coxmod8)
+# test proportional hazard
+cox.zph(coxmod8)
+
 
 #########################################
 ##### Secondary Survival Analysis #####
