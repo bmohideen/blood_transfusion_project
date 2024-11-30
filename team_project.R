@@ -201,194 +201,386 @@ library(ggplot2)
 # Gender (Male)
 gender_male_plot <- ggplot(data_use, aes(x = factor(gender_male))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Gender (Male)", x = "Gender (Male: 1 = Yes, 0 = No)", y = "Count")
+  labs(x = "Gender (Male)", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Alpha-1 antitrypsin deficiency
 aat_deficiency_plot <- ggplot(data_use, aes(x = factor(aat_deficiency))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Alpha-1 Antitrypsin Deficiency", x = "AAT Deficiency (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "AAT Deficiency", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Cystic fibrosis
 cys_fib_plot <- ggplot(data_use, aes(x = factor(cys_fib))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Cystic Fibrosis", x = "Cystic Fibrosis (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "Cystic Fibrosis", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Idiopathic pulmonary arterial hypertension (IPAH)
 ipah_plot <- ggplot(data_use, aes(x = factor(ipah))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Idiopathic Pulmonary Arterial Hypertension (IPAH)", x = "IPAH (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "IPAH", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Interstitial lung disease (ILD)
 ild_plot <- ggplot(data_use, aes(x = factor(ild))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Interstitial Lung Disease (ILD)", x = "ILD (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "ILD", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Other pulmonary diseases
 pulm_other_plot <- ggplot(data_use, aes(x = factor(pulm_other))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Other Pulmonary Diseases", x = "Other Pulmonary Diseases (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "Other Pulmonary Diseases", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Coronary artery disease (CAD)
 cad_plot <- ggplot(data_use, aes(x = factor(cad))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Coronary Artery Disease (CAD)", x = "CAD (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "CAD", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Hypertension
 hypertension_plot <- ggplot(data_use, aes(x = factor(Hypertension))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Hypertension", x = "Hypertension (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "Hypertension", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Type 1 diabetes (T1D)
 t1d_plot <- ggplot(data_use, aes(x = factor(t1d))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Type 1 Diabetes (T1D)", x = "T1D (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "T1D", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Type 2 diabetes (T2D)
 t2d_plot <- ggplot(data_use, aes(x = factor(t2d))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Type 2 Diabetes (T2D)", x = "T2D (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "T2D", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Gastroesophageal reflux disease or peptic ulcer disease (GERD/PUD)
 gerd_pud_plot <- ggplot(data_use, aes(x = factor(gerd_pud))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of GERD/PUD", x = "GERD/PUD (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "GERD/PUD", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Renal failure
 renal_fail_plot <- ggplot(data_use, aes(x = factor(renal_fail))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Renal Failure", x = "Renal Failure (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "Renal Failure", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Stroke
 stroke_plot <- ggplot(data_use, aes(x = factor(stroke))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Stroke", x = "Stroke (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "Stroke", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Liver disease
 liver_disease_plot <- ggplot(data_use, aes(x = factor(liver_disease))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Liver Disease", x = "Liver Disease (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "Liver Disease", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Thyroid disease
 thyroid_disease_plot <- ggplot(data_use, aes(x = factor(thyroid_disease))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Thyroid Disease", x = "Thyroid Disease (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "Thyroid Disease", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # First transplant
 first_transplant_plot <- ggplot(data_use, aes(x = factor(first_transplant))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of First Transplant", x = "First Transplant (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "First Transplant", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Redo transplant
 redo_transplant_plot <- ggplot(data_use, aes(x = factor(redo_transplant))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Redo Transplant", x = "Redo Transplant (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "Redo Transplant", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Extracorporeal lung support (ECLS)
 preop_ecls_plot <- ggplot(data_use, aes(x = factor(preop_ecls))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Preoperative Extracorporeal Lung Support (ECLS)", x = "Preoperative ECLS (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "Preoperative ECLS", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Massive transfusion
 massive_transfusion_plot <- ggplot(data_use, aes(x = factor(massive_transfusion))) +
   geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Bar Plot of Massive Transfusion", x = "Massive Transfusion (1 = Yes, 0 = No)", y = "Count")
+  labs(x = "Massive Transfusion", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 #### Plots for continuous variables ####
 
 # Histogram for LAS score
 las_plot <- ggplot(data_use, aes(x = las)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of LAS Score", x = "Las Score", y = "Frequency")
+  labs(x = "Las Score", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Preoperative Hemoglobin Level
 pre_hb_plot <- ggplot(data_use, aes(x = Pre_Hb)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Preoperative Hemoglobin Level", x = "Pre Hb Score", y = "Frequency")
+  labs(x = "Pre Hb Score", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Preoperative Hematocrit Level
 pre_hct_plot <- ggplot(data_use, aes(x = Pre_Hct)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Preoperative Hematocrit Level", x = "Pre Hct Score", y = "Frequency")
+  labs(x = "Pre Hct Score", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Preoperative Platelets Level
 pre_platelets_plot <- ggplot(data_use, aes(x = Pre_Platelets)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Preoperative Platelets Level", x = "Pre Platelets Score", y = "Frequency")
+  labs(x = "Pre Platelets Score", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Preoperative Prothrombin Time
 pre_pt_plot <- ggplot(data_use, aes(x = Pre_PT)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Preoperative Prothrombin Time", x = "Pre PT Score", y = "Frequency")
+  labs(x = "Pre PT Score", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Preoperative International Normalized Ratio
 pre_inr_plot <- ggplot(data_use, aes(x = Pre_INR)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Preoperative International Normalized Ratio", x = "Pre INR Score", y = "Frequency")
+  labs(x = "Pre INR Score", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Preoperative Partial Thromboplastin Time
 pre_ptt_plot <- ggplot(data_use, aes(x = Pre_PTT)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Preoperative Partial Thromboplastin Time", x = "Pre PTT Score", y = "Frequency")
+  labs(x = "Pre PTT Score", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Preoperative Creatinine Level
 pre_creatinine_plot <- ggplot(data_use, aes(x = Pre_Creatinine)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Preoperative Creatinine Level", x = "Pre Creatinine Score", y = "Frequency")
+  labs(x = "Pre Creatinine Score", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Intraoperative Fresh Frozen Plasma Administered
 intra_plasma_plot <- ggplot(data_use, aes(x = intra_plasma)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Intraoperative Fresh Frozen Plasma Administered", x = "Intra Plasma", y = "Frequency")
+  labs(x = "Intra Plasma", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Intraoperative Packed Red Blood Cell Unit Administered
 intra_packed_cells_plot <- ggplot(data_use, aes(x = intra_packed_cells)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Intraoperative Packed Red Blood Cell Unit Administered", x = "Intra Packed Cells", y = "Frequency")
+  labs(x = "Intra Packed Cells", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Intraoperative Platelets Unit Administered
 intra_platelets_plot <- ggplot(data_use, aes(x = Intra_Platelets)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Intraoperative Platelets Unit Administered", x = "Intra Platelets Cells", y = "Frequency")
+  labs(x = "Intra Platelets Cells", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Intraoperative Cryoprecipitate Unit Administered
 intra_cryoprecipitate_plot <- ggplot(data_use, aes(x = Intra_Cryoprecipitate)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Intraoperative Cryoprecipitate Unit Administered", x = "Intra Cryoprecipitate Cells", y = "Frequency")
+  labs(x = "Intra Cryoprecipitate Cells", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for ICU Stay
 icu_stay_plot <- ggplot(data_use, aes(x = icu_stay)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of ICU Stay in Patients", x = "ICU Stay (Days)", y = "Frequency")
+  labs(x = "ICU Stay (Days)", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Hospital Length of Stay
 hospital_los_plot <- ggplot(data_use, aes(x = HOSPITAL_LOS)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Hospital Length of Stay", x = "Hospital LOS (Days)", y = "Frequency")
+  labs(x = "Hospital LOS (Days)", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Total RBC Unit Transfused 72 hrs Post Surgery
 rbc_72_tot_plot <- ggplot(data_use, aes(x = rbc_72_tot)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Total RBC Unit Transfused 72 hrs Post Surgery", x = "Total RBC Unit Transfused", y = "Frequency")
+  labs(x = "Total RBC Unit Transfused", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Total Fresh Frozen Plasma Unit Transfused 72 hrs Post Surgery
 ffp_72_tot_plot <- ggplot(data_use, aes(x = ffp_72_tot)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Total Fresh Frozen Plasma Unit Transfused 72 hrs Post Surgery", x = "Total Fresh Frozen Plasma Unit Transfused", y = "Frequency")
+  labs(x = "Total Fresh Frozen Plasma Unit 
+       Transfused", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Total Platelets Transfused 72 hrs Post Surgery
 plt_72_tot_plot <- ggplot(data_use, aes(x = plt_72_tot)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Total Platelets Transfused 72 hrs Post Surgery", x = "Total Platelets Transfused", y = "Frequency")
+  labs(x = "Total Platelets Transfused", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Total Cryoprecipitate Unit Transfused 72 hrs Post Surgery
 cryo_72_tot_plot <- ggplot(data_use, aes(x = cryo_72_tot)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Total Cryoprecipitate Unit Transfused 72 hrs Post Surgery", x = "Total Cryoprecipitate Unit Transfused", y = "Frequency")
+  labs(x = "Total Cryoprecipitate Unit 
+       Transfused", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 # Histogram for Total RBC Unit Transfused during the first 24 Hr of surgery
 tot_24_rbc_plot <- ggplot(data_use, aes(x = tot_24_rbc)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Total RBC Unit Transfused in the First 24 hrs of Surgery", x = "Total RBC Unit Transfused", y = "Frequency")
+  labs(x = "Total RBC Unit Transfused", y = "Frequency") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
 
 #### Combined plots for categorical variables ####
 
@@ -423,18 +615,19 @@ cat_labels <- LETTERS[1:num_cat_plots]
 eda_plots_cat <- ggarrange(
   plotlist = categorical_plots, 
   labels = cat_labels, 
-  ncol = 3, 
-  nrow = ceiling(num_cat_plots / 3), 
+  ncol = 5, 
+  nrow = ceiling(num_con_plots / 5), 
   align = "hv" 
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure: Exploratory Data Analysis of Categorical Variables. Each subplot shows the distribution of the respective categorical variable in the dataset.", 
+      "Figure: Exploratory Data Analysis of Categorical Variables. Each subplot shows the distribution of the respective categorical 
+variable in the dataset (1 = Yes and 0 = No).", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
 eda_plots_cat
-ggsave("eda_plots_cat.png", eda_plots_cat, width = 15, height = 10, dpi = 300)
+ggsave("eda_plots_cat.png", eda_plots_cat, width = 12, height = 8, dpi = 300)
 
 #### Combined plots for continuous variables ####
 
@@ -469,18 +662,19 @@ con_labels <- LETTERS[1:num_con_plots]
 eda_plots_con <- ggarrange(
   plotlist = continuous_plots,
   labels = con_labels, 
-  ncol = 3, 
-  nrow = ceiling(num_con_plots / 3), 
+  ncol = 5, 
+  nrow = ceiling(num_con_plots / 5), 
   align = "hv" 
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure: Exploratory Data Analysis of Continuous Variables. Each subplot shows the distribution of the respective continuous variable in the dataset.", 
+      "Figure: Exploratory Data Analysis of Continuous Variables. Each subplot shows the distribution of the respective continuous 
+variable in the dataset.", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
 eda_plots_con
-ggsave("eda_plots_con.png", eda_plots_con, width = 15, height = 10, dpi = 300)
+ggsave("eda_plots_con.png", eda_plots_con, width = 12, height = 8, dpi = 300)
 
 ####################################
 #####     Lasso Regression     #####
