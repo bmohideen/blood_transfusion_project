@@ -1013,6 +1013,11 @@ auc_avg_df <- auc_combined_df %>%
 auc_avg_df
 
 ##### QUESTION 2  #######
+
+#########################################
+##### Loading and Preparing the Data #####
+#########################################
+
 # Anything that has !!! means it needs review (by group)
 # In conjunction with the above, what is the impact of transfusion on patient outcomes, including mortality? #
 
@@ -1080,31 +1085,130 @@ data_with_dead <- data_with_dead %>%
 sup_dwd <- sup_dwd %>%
   mutate(
     time_death = if_else(is.na(time_death), 365, time_death))
+# for sup_dwd also convert anything above 365 to 365 RIGHT !!!
+sup_dwd <- sup_dwd %>%
+  mutate(
+    time_death = if_else((time_death > 365), 365, time_death))
     
-# time to death - including censored at 365 days
+# time to death - including censored at 365 days - DEATH_DATE data set 
 ggplot(data_with_dead, aes(x = time_death)) + 
       geom_histogram(bins = 10, fill = "lightblue", color = "black") +
       labs(title = "Histogram of Patient Time to Death", x = "Time to Death (days)", y = "Frequency")
     
+# time to death - including censored at 365 days - sup_dwd dataset 
+ggplot(sup_dwd, aes(x = time_death)) + 
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Patient Time to Death", x = "Time to Death (days)", y = "Frequency")
     
 # Ensure all variables that will be included in the data set for the analyses are relevant 
 # removed study Id and tx_db_id -> just identifiers
 # removed or_date and DEATH_DATE -> represented in time_death
+# removed first transplant since it is the same as redo transplant 
 # remove due to high missingness: pre_fibrinogen, rbc_0_24, rbc_24_48, rbc_48_72, ffp_0_24, ffp_24_48, ffp_48_72, plt_0_24, plt_24_48, plt_48_72, cryo_0_24, cryo_24_48, cyro_48_72
 # SHOULD I ALSO REMOVE ALIVE 30 DAYS, 90 DAYS and 1 YEAR? !!!
 data_with_dead <- data_with_dead %>%
-      select(Type, or_date, gender_male, aat_deficiency, cys_fib, ipah, 
+  mutate(type = if_else(Type == "Bilateral", "Double", "Single")) %>% # modifying type to single or double transplant
+      select(type, gender_male, aat_deficiency, cys_fib, ipah, 
              ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud, renal_fail, stroke, 
-             liver_disease, thyroid_disease, first_transplant, redo_transplant, evlp, preop_ecls,
-             las, Pre_Hb, Pre_Hct, Pre_Platelets, Pre_PT, Pre_INR, Pre_PTT, Pre_Fibrinogen, Pre_Creatinine,
+             liver_disease, thyroid_disease, redo_transplant, evlp, preop_ecls,
+             las, Pre_Hb, Pre_Hct, Pre_Platelets, Pre_PT, Pre_INR, Pre_PTT, Pre_Creatinine,
              intraop_ecls, ECLS_ECMO, ECLS_CPB, intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
              icu_stay, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
              rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot,
-             tot_24_rbc, massive_transfusion, Age, BMI, time_death, has_value, transfusion) %>%
-mutate(type = if_else(Type == "Bilateral", "Double", "Single")) # modifying type to single or double transplant
-    
+             tot_24_rbc, massive_transfusion, Age, BMI, time_death, has_value, transfusion)
+
+# same for sup_dwd 
+sup_dwd <- sup_dwd %>%
+  mutate(type = if_else(Type == "Bilateral", "Double", "Single")) %>% # modifying type to single or double transplant
+  select(type, gender_male, aat_deficiency, cys_fib, ipah, 
+         ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud, renal_fail, stroke, 
+         liver_disease, thyroid_disease, redo_transplant, evlp, preop_ecls,
+         las, Pre_Hb, Pre_Hct, Pre_Platelets, Pre_PT, Pre_INR, Pre_PTT, Pre_Creatinine,
+         intraop_ecls, ECLS_ECMO, ECLS_CPB, intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
+         icu_stay, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
+         rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot,
+         tot_24_rbc, massive_transfusion, Age, BMI, time_death, has_value, transfusion)
+
+### ASK TRINELY !!! - from the model results of the coefficients with all we did not include
+# liver_disease, Pre_Hct -> OTHERS CHECK BUT JUST COPY PASTE?? !!! 
+### SO SHOULD I KEEP THEM IN HERE OR REMOVE????
+
+#########################################
+##### Primary Survival Analysis #####
+#########################################
+# done on sup_dwd dataset
 # add the library required for the survival analysis 
 library(survival)
+
+##### Kaplan-Meier Survival Curves #####
+# create an unstratified Kaplan-Meier estimate 
+s1 <- survfit(Surv(time_death, has_value==1)~1, data=sup_dwd)
+
+# Kaplan-Meier Curve
+plot(s1,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95) 
+
+# create a stratified surivival anlysis - vsiual for log rank test
+s3 <- survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead)
+
+# Kaplan-Meier Curve 
+plot(s3,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95, col=1:2, fun = "S") 
+legend("topright",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
+
+##### Log Rank Test #####
+# must first check the proportional hazard assumption using function set to "cloglog"
+# plot a cloglog plot against log(t)
+plot(survfit(Surv(time_death, has_value==1)~transfusion, data=sup_dwd), fun = "cloglog", col=1:2, xlab = "Time (days)", ylab="log[log(Survival probability)]")
+# add a legend with col to distinguish levels
+legend("topleft",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
+
+# Run the log-rank test # CRYSTAL GOT A P OF 0.5 !!! a p value of 1 is the max !!!
+LR_test1 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=sup_dwd)
+LR_test1
+
+##### Cox Proportional Hazard Model #####
+# using the rule of thumb for 10 events per variable
+# citation in report (from https://pmc.ncbi.nlm.nih.gov/articles/PMC5045274/#:~:text=The%20choice%20of%20an%20adequate,events%20per%20variable%20(EPV).)
+# this will be a significant limitation as there are only 23 events -> would be limited to 2 variables but that seems very small 
+## any more may be subject to overfitting or estimates that are highly sensitive to small changes 
+### DO I NEED TO CHECK FOR COLLINEARITY?? !!!
+# Run a Cox proportional hazard model including variables found to be relevant in Question 1 Lasso regression (all) - see report !!! 
+coxmod1 <- coxph(Surv(time_death, has_value==1) ~ transfusion + Type + ipah + pulm_other + Hypertension + t2d + gerd_pud + stroke + 
+                   + Pre_Hb + Pre_Platelets + Pre_INR + redo_transplant + intraop_ecls + las, data=sup_dwd)
+summary(coxmod1)
+## SEE LIT -> Hmm concerning cause a nothing seems to be relevant 
+## warning is concerning!! 
+## maybe aslo add relevant predictors from the first quetsion !!!
+# test proportional hazard
+cox.zph(coxmod1)
+
+# see if this is any better 
+coxmod2 <- coxph(Surv(time_death, has_value==1) ~ transfusion + gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
+                 + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot +  Pre_Hb + intraop_ecls,data=sup_dwd)
+summary(coxmod2)
+# test proportional hazard
+cox.zph(coxmod2)
+
+# see if this is any better - did all the ones from model 1 and model 2
+# DLEETE THE ONES THAT GO INFINITE FOR THE 95% CI?
+coxmod4 <- coxph(Surv(time_death, has_value==1) ~ transfusion + gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
+                 + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot  + Type + ipah + pulm_other + Hypertension + t2d + gerd_pud + stroke + 
+                   + Pre_Hb + Pre_Platelets + Pre_INR + redo_transplant + intraop_ecls + las ,data=sup_dwd)
+summary(coxmod4)
+# test proportional hazard
+cox.zph(coxmod4)
+
+# see if this is any better - did all the ones from lasso model that appeared 5 times 
+# DLEETE THE ONES THAT GO INFINITE FOR THE 95% CI?
+coxmod5 <- coxph(Surv(time_death, has_value==1) ~ transfusion + intraop_ecls + Pre_Hb ,data=sup_dwd)
+summary(coxmod5)
+# test proportional hazard
+cox.zph(coxmod5)
+
+#########################################
+##### Secondary Survival Analysis #####
+#########################################
+# done on data_with_dead dataset -> performed for supplementary methods and interest
+
 # create an unstratified Kaplan-Meier estimate 
 sf1 <- survfit(Surv(time_death, has_value==1)~1, data=data_with_dead)
     
@@ -1114,9 +1218,9 @@ plot(sf1,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", co
 # create a stratified surivival anlysis - CAN I OR SHOULD I DO THIS !!! probably cause log rank is looking at this right 
 sf3 <- survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead)
     
-# Kaplan-Meier Curve - UGLY PROBABLY DELETE !!!
+# Kaplan-Meier Curve 
 plot(sf3,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95, col=1:2, fun = "S") 
-legend("topright",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:3)
+legend("topright",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
     
 # Preform the log-rank test
 # must first check the proportional hazard assumption using function set to "cloglog"
@@ -1125,7 +1229,7 @@ plot(survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead), f
 # add a legend with col to distinguish levels
 legend("topleft",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
     
-# Run the log-rank test # CRYSTAL GOT A P OF 0.5 !!! a p value of 1 is the max !!!
+# Run the log-rank test 
 LR_test3 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=data_with_dead)
 LR_test3
     
