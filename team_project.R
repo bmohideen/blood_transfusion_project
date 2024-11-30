@@ -772,6 +772,433 @@ roc_plots <- ggarrange(plotlist = roc_plot,
 roc_plots
 ggsave("roc_plots.png", roc_plots, width = 12, height = 8, dpi = 300)
 
+#### LASSO Regression: Amount of Transfusion ####
+
+# adding new columns with sum of 24 hour + intraoperative values
+data_use_with_sums <- data_use %>%
+  mutate(
+    tot_24_ffp = ffp_0_24 + intra_plasma,
+    tot_24_plt = plt_0_24 + Intra_Platelets,
+    tot_24_cryo = cryo_0_24 + Intra_Cryoprecipitate
+  )
+
+# Convert NA values to 0 in these columns
+# Should be coded as 0, rather than NA
+data_use_with_sums_v1 <- data_use_with_sums %>%
+  mutate(
+    tot_24_ffp = replace_na(tot_24_ffp, 0),
+    tot_24_plt = replace_na(tot_24_plt, 0),
+    tot_24_cryo = replace_na(tot_24_cryo, 0),
+    tot_24_rbc = replace_na(tot_24_rbc, 0)
+  )
+
+# includes all variables
+data_use_lasso_all_amount <- data_use_with_sums_v1 %>%
+  mutate(transfusion = if_else(
+    rowSums(across(c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate, 
+                     rbc_72_tot, ffp_72_tot, plt_72_tot, cryo_72_tot))) == 0, 0, 1
+  )
+  ) %>% 
+  select(Age, type, aat_deficiency, ECLS_CPB, ECLS_ECMO, cys_fib, ipah, ild, pulm_other, 
+         cad, Hypertension, t2d, t1d, gerd_pud, renal_fail, stroke, liver_disease, 
+         thyroid_disease, evlp, Pre_Hb, Pre_Hct, Pre_Platelets, 
+         Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
+         preop_ecls, intraop_ecls, las, transfusion, tot_24_rbc, tot_24_ffp, tot_24_plt, 
+         tot_24_cryo, massive_transfusion)
+
+# Filtering only for patients with a transfusion
+only_transf_patients <- data_use_lasso_all_amount %>%
+  filter(transfusion == 1)
+
+# Check for missing values
+colSums(is.na(only_transf_patients))
+
+# Imputing for missing data
+imp <- mice(only_transf_patients, seed = 123, m = 20, print = FALSE)
+only_transf_patients_v1 <- complete(imp, action = 1)
+
+# Create a sequence of repeat indices from 1 to 5, since the assessment will be completed for 5 repeats
+repeats <- seq(from = 1, to = 5, by = 1)
+
+#### RBC #### 
+
+# Create empty numeric vector to store R-squared values for each repeat
+lasso_r2_rbc <- numeric(length = length(repeats))
+# Create empty numeric vector to store minimum lambda values that maximize the R-squared for each repeat
+lambda_min_rbc <- numeric(length = length(repeats))
+# Create empty list to store the coefficients
+coef_rbc <- list()
+# Create empty list to store lasso coefficient path plots for each repeat
+lasso_plot_rbc <- list()
+# Create empty list to store AUC plots for each repeat
+r2_plot_rbc <- list()
+
+# Create a loop that completes 5 repeats of lasso regression, cross-validation, 
+# testing on test set, and plotting R-squared
+for (i in repeats) {
+  # Set seed for each iteration
+  set.seed(i)
+  
+  # Randomly select row indices for training set and split the data into training and testing sets
+  train_indices_rbc <- sample(nrow(only_transf_patients_v1), round(nrow(only_transf_patients_v1) / 2))
+  # Create a model matrix
+  x_all_rbc <- model.matrix(tot_24_rbc ~ ., only_transf_patients_v1)
+  # Select training set
+  x_train_rbc <- x_all_rbc[train_indices_rbc, -1]
+  # Select the rest as test set
+  x_validation_rbc <- x_all_rbc[-train_indices_rbc, -1]
+  # Select response set for training
+  y_train_rbc <- only_transf_patients_v1$tot_24_rbc[train_indices_rbc]
+  # Select response set for testing
+  y_validation_rbc <- only_transf_patients_v1$tot_24_rbc[-train_indices_rbc]
+  # Fit the lasso model
+  lasso_mod_rbc <- glmnet(x_train_rbc, y_train_rbc, alpha = 1)
+  # Plot and store the lasso coefficient path plot
+  par(mar = c(5, 4, 4, 2) + 0.1)
+  plot(lasso_mod_rbc, label = T, xvar = "lambda")
+  lasso_plot_rbc[[i]] <- recordPlot()
+  
+  # Conduct cross-validation with mean squared error as the measure 
+  cv_lasso_rbc <- cv.glmnet(x_train_rbc, y_train_rbc, alpha = 1, 
+                            type.measure = "mse", nfolds = 5)
+  # Plot the cross-validation error as a function of lambda
+  par(mar = c(5, 4, 4, 2) + 0.1)
+  plot(cv_lasso_rbc)
+  # Store the plot
+  r2_plot_rbc[[i]] <- recordPlot()
+  # Extract and store the lambda value that minimizes MSE
+  lambda_min_rbc[i] <- cv_lasso_rbc$lambda.min
+  # Extract and store the relevant coefficients for the associated lambda value
+  coef_rbc[i] <- coef(cv_lasso_rbc, s = "lambda.min")
+  
+  # Testing on the test set
+  pred_lasso_rbc <- predict(
+    lasso_mod_rbc, 
+    newx = x_validation_rbc, 
+    s = cv_lasso_rbc$lambda.min)
+  
+  # Calculate R-squared as a measure of model performance
+  ss_total_rbc <- sum((y_validation_rbc - mean(y_validation_rbc))^2)
+  ss_residual_rbc <- sum((y_validation_rbc - pred_lasso_rbc)^2)
+  r_squared_rbc <- 1 - (ss_residual_rbc / ss_total_rbc)
+  lasso_r2_rbc[i] <- r_squared_rbc
+  
+}
+
+# Compile R-squared values into a dataframe
+lasso_r2_df_rbc <- data.frame(
+  Model = rep("Lasso Regression", 5),
+  Vars = rep("RBC", 5),
+  Iteration = paste0("Iteration", 1:5),  
+  R_Squared = lasso_r2_rbc  # Actual R-squared values
+)
+lasso_r2_df_rbc
+
+# Convert each matrix into a dataframe with Feature and Coefficient columns
+coef_dfs_rbc <- lapply(seq_along(coef_rbc), function(i) {
+  mat <- coef_rbc[[i]]
+  
+  # Convert matrix to a dataframe and extract non-zero coefficients
+  df_rbc <- as.data.frame(as.matrix(mat))
+  df_rbc$Feature <- rownames(df_rbc)
+  colnames(df_rbc) <- c(paste0("Repetition", i), "Feature")  # Rename coefficient column
+  
+  # Keep only non-zero coefficients
+  df_rbc <- df_rbc[df_rbc[[1]] != 0, , drop = FALSE]
+  df_rbc
+})
+
+# Merge all dataframes by "Feature", using full_join to align features across repetitions
+nonzero_coef_rbc <- Reduce(function(x, y) full_join(x, y, by = "Feature"), coef_dfs_rbc)
+
+# Replace NAs with 0 for features not present in certain repetitions
+nonzero_coef_rbc[is.na(nonzero_coef_rbc)] <- 0
+nonzero_coef_rbc
+
+#### FFP ####
+
+# Create empty numeric vector to store R-squared values for each repeat
+lasso_r2_ffp <- numeric(length = length(repeats))
+# Create empty numeric vector to store minimum lambda values that maximize the R-squared for each repeat
+lambda_min_ffp <- numeric(length = length(repeats))
+# Create empty list to store the coefficients
+coef_ffp <- list()
+# Create empty list to store lasso coefficient path plots for each repeat
+lasso_plot_ffp <- list()
+# Create empty list to store AUC plots for each repeat
+r2_plot_ffp <- list()
+
+# Create a loop that completes 5 repeats of lasso regression, cross-validation, 
+# testing on test set, and plotting R-squared
+for (i in repeats) {
+  # Set seed for each iteration
+  set.seed(i)
+  
+  # Randomly select row indices for training set and split the data into training and testing sets
+  train_indices_ffp <- sample(nrow(only_transf_patients_v1), round(nrow(only_transf_patients_v1) / 2))
+  # Create a model matrix
+  x_all_ffp <- model.matrix(tot_24_ffp ~ ., only_transf_patients_v1)
+  # Select training set
+  x_train_ffp <- x_all_ffp[train_indices_ffp, -1]
+  # Select the rest as test set
+  x_validation_ffp <- x_all_ffp[-train_indices_ffp, -1]
+  # Select response set for training
+  y_train_ffp <- only_transf_patients_v1$tot_24_ffp[train_indices_ffp]
+  # Select response set for testing
+  y_validation_ffp <- only_transf_patients_v1$tot_24_ffp[-train_indices_ffp]
+  # Fit the lasso model
+  lasso_mod_ffp <- glmnet(x_train_ffp, y_train_ffp, alpha = 1)
+  # Plot and store the lasso coefficient path plot
+  par(mar = c(5, 4, 4, 2) + 0.1)
+  plot(lasso_mod_ffp, label = T, xvar = "lambda")
+  lasso_plot_ffp[[i]] <- recordPlot()
+  
+  # Conduct cross-validation with mean squared error as the measure 
+  cv_lasso_ffp <- cv.glmnet(x_train_ffp, y_train_ffp, alpha = 1, 
+                            type.measure = "mse", nfolds = 5)
+  # Plot the cross-validation error as a function of lambda
+  par(mar = c(5, 4, 4, 2) + 0.1)
+  plot(cv_lasso_ffp)
+  # Store the plot
+  r2_plot_ffp[[i]] <- recordPlot()
+  # Extract and store the lambda value that minimizes MSE
+  lambda_min_ffp[i] <- cv_lasso_ffp$lambda.min
+  # Extract and store the relevant coefficients for the associated lambda value
+  coef_ffp[i] <- coef(cv_lasso_ffp, s = "lambda.min")
+  
+  # Testing on the test set
+  pred_lasso_ffp <- predict(
+    lasso_mod_ffp, 
+    newx = x_validation_ffp, 
+    s = cv_lasso_ffp$lambda.min)
+  
+  # Calculate R-squared as a measure of model performance
+  ss_total_ffp <- sum((y_validation_ffp - mean(y_validation_ffp))^2)
+  ss_residual_ffp <- sum((y_validation_ffp - pred_lasso_ffp)^2)
+  r_squared_ffp <- 1 - (ss_residual_ffp / ss_total_ffp)
+  lasso_r2_ffp[i] <- r_squared_ffp
+  
+}
+
+# Compile R-squared values into a dataframe
+lasso_r2_df_ffp <- data.frame(
+  Model = rep("Lasso Regression", 5),
+  Vars = rep("FFP", 5),
+  Iteration = paste0("Iteration", 1:5),  
+  R_Squared = lasso_r2_ffp  # Actual R-squared values
+)
+lasso_r2_df_ffp
+
+# Convert each matrix into a dataframe with Feature and Coefficient columns
+coef_dfs_ffp <- lapply(seq_along(coef_ffp), function(i) {
+  mat <- coef_ffp[[i]]
+  
+  # Convert matrix to a dataframe and extract non-zero coefficients
+  df_ffp <- as.data.frame(as.matrix(mat))
+  df_ffp$Feature <- rownames(df_ffp)
+  colnames(df_ffp) <- c(paste0("Repetition", i), "Feature")  # Rename coefficient column
+  
+  # Keep only non-zero coefficients
+  df_ffp <- df_ffp[df_ffp[[1]] != 0, , drop = FALSE]
+  df_ffp
+})
+
+# Merge all dataframes by "Feature", using full_join to align features across repetitions
+nonzero_coef_ffp <- Reduce(function(x, y) full_join(x, y, by = "Feature"), coef_dfs_ffp)
+
+# Replace NAs with 0 for features not present in certain repetitions
+nonzero_coef_ffp[is.na(nonzero_coef_ffp)] <- 0
+nonzero_coef_ffp
+
+#### PLT ####
+
+# Create empty numeric vector to store R-squared values for each repeat
+lasso_r2_plt <- numeric(length = length(repeats))
+# Create empty numeric vector to store minimum lambda values that maximize the R-squared for each repeat
+lambda_min_plt <- numeric(length = length(repeats))
+# Create empty list to store the coefficients
+coef_plt <- list()
+# Create empty list to store lasso coefficient path plots for each repeat
+lasso_plot_plt <- list()
+# Create empty list to store AUC plots for each repeat
+r2_plot_plt <- list()
+
+# Create a loop that completes 5 repeats of lasso regression, cross-validation, 
+# testing on test set, and plotting R-squared
+for (i in repeats) {
+  # Set seed for each iteration
+  set.seed(i)
+  
+  # Randomly select row indices for training set and split the data into training and testing sets
+  train_indices_plt <- sample(nrow(only_transf_patients_v1), round(nrow(only_transf_patients_v1) / 2))
+  # Create a model matrix
+  x_all_plt <- model.matrix(tot_24_plt ~ ., only_transf_patients_v1)
+  # Select training set
+  x_train_plt <- x_all_plt[train_indices_plt, -1]
+  # Select the rest as test set
+  x_validation_plt <- x_all_plt[-train_indices_plt, -1]
+  # Select response set for training
+  y_train_plt <- only_transf_patients_v1$tot_24_plt[train_indices_plt]
+  # Select response set for testing
+  y_validation_plt <- only_transf_patients_v1$tot_24_plt[-train_indices_plt]
+  # Fit the lasso model
+  lasso_mod_plt <- glmnet(x_train_plt, y_train_plt, alpha = 1)
+  # Plot and store the lasso coefficient path plot
+  par(mar = c(5, 4, 4, 2) + 0.1)
+  plot(lasso_mod_plt, label = T, xvar = "lambda")
+  lasso_plot_plt[[i]] <- recordPlot()
+  
+  # Conduct cross-validation with mean squared error as the measure 
+  cv_lasso_plt <- cv.glmnet(x_train_plt, y_train_plt, alpha = 1, 
+                            type.measure = "mse", nfolds = 5)
+  # Plot the cross-validation error as a function of lambda
+  par(mar = c(5, 4, 4, 2) + 0.1)
+  plot(cv_lasso_plt)
+  # Store the plot
+  r2_plot_plt[[i]] <- recordPlot()
+  # Extract and store the lambda value that minimizes MSE
+  lambda_min_plt[i] <- cv_lasso_plt$lambda.min
+  # Extract and store the relevant coefficients for the associated lambda value
+  coef_plt[i] <- coef(cv_lasso_plt, s = "lambda.min")
+  
+  # Testing on the test set
+  pred_lasso_plt <- predict(
+    lasso_mod_plt, 
+    newx = x_validation_plt, 
+    s = cv_lasso_plt$lambda.min)
+  
+  # Calculate R-squared as a measure of model performance
+  ss_total_plt <- sum((y_validation_plt - mean(y_validation_plt))^2)
+  ss_residual_plt <- sum((y_validation_plt - pred_lasso_plt)^2)
+  r_squared_plt <- 1 - (ss_residual_plt / ss_total_plt)
+  lasso_r2_plt[i] <- r_squared_plt
+  
+}
+
+# Compile R-squared values into a dataframe
+lasso_r2_df_plt <- data.frame(
+  Model = rep("Lasso Regression", 5),
+  Vars = rep("PLT", 5),
+  Iteration = paste0("Iteration", 1:5),  
+  R_Squared = lasso_r2_plt  # Actual R-squared values
+)
+lasso_r2_df_plt
+
+# Convert each matrix into a dataframe with Feature and Coefficient columns
+coef_dfs_plt <- lapply(seq_along(coef_plt), function(i) {
+  mat <- coef_plt[[i]]
+  
+  # Convert matrix to a dataframe and extract non-zero coefficients
+  df_plt <- as.data.frame(as.matrix(mat))
+  df_plt$Feature <- rownames(df_plt)
+  colnames(df_plt) <- c(paste0("Repetition", i), "Feature")  # Rename coefficient column
+  
+  # Keep only non-zero coefficients
+  df_plt <- df_plt[df_plt[[1]] != 0, , drop = FALSE]
+  df_plt
+})
+
+# Merge all dataframes by "Feature", using full_join to align features across repetitions
+nonzero_coef_plt <- Reduce(function(x, y) full_join(x, y, by = "Feature"), coef_dfs_plt)
+
+# Replace NAs with 0 for features not present in certain repetitions
+nonzero_coef_plt[is.na(nonzero_coef_plt)] <- 0
+nonzero_coef_plt
+
+#### CRYO ####
+
+# Create empty numeric vector to store R-squared values for each repeat
+lasso_r2_cryo <- numeric(length = length(repeats))
+# Create empty numeric vector to store minimum lambda values that maximize the R-squared for each repeat
+lambda_min_cryo <- numeric(length = length(repeats))
+# Create empty list to store the coefficients
+coef_cryo <- list()
+# Create empty list to store lasso coefficient path plots for each repeat
+lasso_plot_cryo <- list()
+# Create empty list to store AUC plots for each repeat
+r2_plot_cryo <- list()
+
+# Create a loop that completes 5 repeats of lasso regression, cross-validation, 
+# testing on test set, and plotting R-squared
+for (i in repeats) {
+  # Set seed for each iteration
+  set.seed(i)
+  
+  # Randomly select row indices for training set and split the data into training and testing sets
+  train_indices_cryo <- sample(nrow(only_transf_patients_v1), round(nrow(only_transf_patients_v1) / 2))
+  # Create a model matrix
+  x_all_cryo <- model.matrix(tot_24_cryo ~ ., only_transf_patients_v1)
+  # Select training set
+  x_train_cryo <- x_all_cryo[train_indices_cryo, -1]
+  # Select the rest as test set
+  x_validation_cryo <- x_all_cryo[-train_indices_cryo, -1]
+  # Select response set for training
+  y_train_cryo <- only_transf_patients_v1$tot_24_cryo[train_indices_cryo]
+  # Select response set for testing
+  y_validation_cryo <- only_transf_patients_v1$tot_24_cryo[-train_indices_cryo]
+  # Fit the lasso model
+  lasso_mod_cryo <- glmnet(x_train_cryo, y_train_cryo, alpha = 1)
+  # Plot and store the lasso coefficient path plot
+  par(mar = c(5, 4, 4, 2) + 0.1)
+  plot(lasso_mod_cryo, label = T, xvar = "lambda")
+  lasso_plot_cryo[[i]] <- recordPlot()
+  
+  # Conduct cross-validation with mean squared error as the measure 
+  cv_lasso_cryo <- cv.glmnet(x_train_cryo, y_train_cryo, alpha = 1, 
+                             type.measure = "mse", nfolds = 5)
+  # Plot the cross-validation error as a function of lambda
+  par(mar = c(5, 4, 4, 2) + 0.1)
+  plot(cv_lasso_cryo)
+  # Store the plot
+  r2_plot_cryo[[i]] <- recordPlot()
+  # Extract and store the lambda value that minimizes MSE
+  lambda_min_cryo[i] <- cv_lasso_cryo$lambda.min
+  # Extract and store the relevant coefficients for the associated lambda value
+  coef_cryo[i] <- coef(cv_lasso_cryo, s = "lambda.min")
+  
+  # Testing on the test set
+  pred_lasso_cryo <- predict(
+    lasso_mod_cryo, 
+    newx = x_validation_cryo, 
+    s = cv_lasso_cryo$lambda.min)
+  
+  # Calculate R-squared as a measure of model performance
+  ss_total_cryo <- sum((y_validation_cryo - mean(y_validation_cryo))^2)
+  ss_residual_cryo <- sum((y_validation_cryo - pred_lasso_cryo)^2)
+  r_squared_cryo <- 1 - (ss_residual_cryo / ss_total_cryo)
+  lasso_r2_cryo[i] <- r_squared_cryo
+  
+}
+
+# Compile R-squared values into a dataframe
+lasso_r2_df_cryo <- data.frame(
+  Model = rep("Lasso Regression", 5),
+  Vars = rep("CRYO", 5),
+  Iteration = paste0("Iteration", 1:5),  
+  R_Squared = lasso_r2_cryo  # Actual R-squared values
+)
+lasso_r2_df_cryo
+
+# Convert each matrix into a dataframe with Feature and Coefficient columns
+coef_dfs_cryo <- lapply(seq_along(coef_cryo), function(i) {
+  mat <- coef_cryo[[i]]
+  
+  # Convert matrix to a dataframe and extract non-zero coefficients
+  df_cryo <- as.data.frame(as.matrix(mat))
+  df_cryo$Feature <- rownames(df_cryo)
+  colnames(df_cryo) <- c(paste0("Repetition", i), "Feature")  # Rename coefficient column
+  
+  # Keep only non-zero coefficients
+  df_cryo <- df_cryo[df_cryo[[1]] != 0, , drop = FALSE]
+  df_cryo
+})
+
+# Merge all dataframes by "Feature", using full_join to align features across repetitions
+nonzero_coef_cryo <- Reduce(function(x, y) full_join(x, y, by = "Feature"), coef_dfs_cryo)
+
+# Replace NAs with 0 for features not present in certain repetitions
+nonzero_coef_cryo[is.na(nonzero_coef_cryo)] <- 0
+nonzero_coef_cryo
 
 #######################################
 #####     CART Classification     #####
