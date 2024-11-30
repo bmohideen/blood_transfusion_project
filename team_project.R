@@ -199,214 +199,288 @@ library(ggplot2)
 #### Plots for categorical variables ####
 
 # Gender (Male)
-ggplot(data_use, aes(x = factor(gender_male))) +
+gender_male_plot <- ggplot(data_use, aes(x = factor(gender_male))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Gender (Male)", x = "Gender (Male: 1 = Yes, 0 = No)", y = "Count")
 
 # Alpha-1 antitrypsin deficiency
-ggplot(data_use, aes(x = factor(aat_deficiency))) +
+aat_deficiency_plot <- ggplot(data_use, aes(x = factor(aat_deficiency))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Alpha-1 Antitrypsin Deficiency", x = "AAT Deficiency (1 = Yes, 0 = No)", y = "Count")
 
 # Cystic fibrosis
-ggplot(data_use, aes(x = factor(cys_fib))) +
+cys_fib_plot <- ggplot(data_use, aes(x = factor(cys_fib))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Cystic Fibrosis", x = "Cystic Fibrosis (1 = Yes, 0 = No)", y = "Count")
 
 # Idiopathic pulmonary arterial hypertension (IPAH)
-ggplot(data_use, aes(x = factor(ipah))) +
+ipah_plot <- ggplot(data_use, aes(x = factor(ipah))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Idiopathic Pulmonary Arterial Hypertension (IPAH)", x = "IPAH (1 = Yes, 0 = No)", y = "Count")
 
 # Interstitial lung disease (ILD)
-ggplot(data_use, aes(x = factor(ild))) +
+ild_plot <- ggplot(data_use, aes(x = factor(ild))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Interstitial Lung Disease (ILD)", x = "ILD (1 = Yes, 0 = No)", y = "Count")
 
 # Other pulmonary diseases
-ggplot(data_use, aes(x = factor(pulm_other))) +
+pulm_other_plot <- ggplot(data_use, aes(x = factor(pulm_other))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Other Pulmonary Diseases", x = "Other Pulmonary Diseases (1 = Yes, 0 = No)", y = "Count")
 
 # Coronary artery disease (CAD)
-ggplot(data_use, aes(x = factor(cad))) +
+cad_plot <- ggplot(data_use, aes(x = factor(cad))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Coronary Artery Disease (CAD)", x = "CAD (1 = Yes, 0 = No)", y = "Count")
 
 # Hypertension
-ggplot(data_use, aes(x = factor(Hypertension))) +
+hypertension_plot <- ggplot(data_use, aes(x = factor(Hypertension))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Hypertension", x = "Hypertension (1 = Yes, 0 = No)", y = "Count")
 
 # Type 1 diabetes (T1D)
-ggplot(data_use, aes(x = factor(t1d))) +
+t1d_plot <- ggplot(data_use, aes(x = factor(t1d))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Type 1 Diabetes (T1D)", x = "T1D (1 = Yes, 0 = No)", y = "Count")
 
 # Type 2 diabetes (T2D)
-ggplot(data_use, aes(x = factor(t2d))) +
+t2d_plot <- ggplot(data_use, aes(x = factor(t2d))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Type 2 Diabetes (T2D)", x = "T2D (1 = Yes, 0 = No)", y = "Count")
 
 # Gastroesophageal reflux disease or peptic ulcer disease (GERD/PUD)
-ggplot(data_use, aes(x = factor(gerd_pud))) +
+gerd_pud_plot <- ggplot(data_use, aes(x = factor(gerd_pud))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of GERD/PUD", x = "GERD/PUD (1 = Yes, 0 = No)", y = "Count")
 
 # Renal failure
-ggplot(data_use, aes(x = factor(renal_fail))) +
+renal_fail_plot <- ggplot(data_use, aes(x = factor(renal_fail))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Renal Failure", x = "Renal Failure (1 = Yes, 0 = No)", y = "Count")
 
 # Stroke
-ggplot(data_use, aes(x = factor(stroke))) +
+stroke_plot <- ggplot(data_use, aes(x = factor(stroke))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Stroke", x = "Stroke (1 = Yes, 0 = No)", y = "Count")
 
 # Liver disease
-ggplot(data_use, aes(x = factor(liver_disease))) +
+liver_disease_plot <- ggplot(data_use, aes(x = factor(liver_disease))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Liver Disease", x = "Liver Disease (1 = Yes, 0 = No)", y = "Count")
 
 # Thyroid disease
-ggplot(data_use, aes(x = factor(thyroid_disease))) +
+thyroid_disease_plot <- ggplot(data_use, aes(x = factor(thyroid_disease))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Thyroid Disease", x = "Thyroid Disease (1 = Yes, 0 = No)", y = "Count")
 
 # First transplant
-ggplot(data_use, aes(x = factor(first_transplant))) +
+first_transplant_plot <- ggplot(data_use, aes(x = factor(first_transplant))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of First Transplant", x = "First Transplant (1 = Yes, 0 = No)", y = "Count")
 
 # Redo transplant
-ggplot(data_use, aes(x = factor(redo_transplant))) +
+redo_transplant_plot <- ggplot(data_use, aes(x = factor(redo_transplant))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Redo Transplant", x = "Redo Transplant (1 = Yes, 0 = No)", y = "Count")
 
 # Extracorporeal lung support (ECLS)
-ggplot(data_use, aes(x = factor(preop_ecls))) +
+preop_ecls_plot <- ggplot(data_use, aes(x = factor(preop_ecls))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Preoperative Extracorporeal Lung Support (ECLS)", x = "Preoperative ECLS (1 = Yes, 0 = No)", y = "Count")
 
 # Massive transfusion
-ggplot(data_use, aes(x = factor(massive_transfusion))) +
+massive_transfusion_plot <- ggplot(data_use, aes(x = factor(massive_transfusion))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Massive Transfusion", x = "Massive Transfusion (1 = Yes, 0 = No)", y = "Count")
 
 #### Plots for continuous variables ####
 
-# Plotting a histogram for las score
-ggplot(data_use, aes(x = las)) + 
+# Histogram for LAS score
+las_plot <- ggplot(data_use, aes(x = las)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
   labs(title = "Histogram of LAS Score", x = "Las Score", y = "Frequency")
 
-# Plotting a histogram for Preoperative Hemoglobin Level
-ggplot(data_use, aes(x = Pre_Hb)) + 
+# Histogram for Preoperative Hemoglobin Level
+pre_hb_plot <- ggplot(data_use, aes(x = Pre_Hb)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Preoperative Hemoglobin Level", x = "Pre Hb Score", y = "Frequency")
 
-# Plotting a histogram for Preoperative Hematocrit Level
-ggplot(data_use, aes(x = Pre_Hct)) + 
+# Histogram for Preoperative Hematocrit Level
+pre_hct_plot <- ggplot(data_use, aes(x = Pre_Hct)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Preoperative Hematocrit Level", x = "Pre Hct Score", y = "Frequency")
 
-# Plotting a histogram for Preoperative Platelets Level
-ggplot(data_use, aes(x = Pre_Platelets)) + 
+# Histogram for Preoperative Platelets Level
+pre_platelets_plot <- ggplot(data_use, aes(x = Pre_Platelets)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Preoperative Platelets Level", x = "Pre Platelets Score", y = "Frequency")
 
-# Plotting a histogram for Preoperative Prothrombin Time
-ggplot(data_use, aes(x = Pre_PT)) + 
+# Histogram for Preoperative Prothrombin Time
+pre_pt_plot <- ggplot(data_use, aes(x = Pre_PT)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Preoperative Prothrombin Time", x = "Pre PT Score", y = "Frequency")
 
-# Plotting a histogram for Preoperative international normalized ratio (standardized measure of PT)
-ggplot(data_use, aes(x = Pre_INR)) + 
+# Histogram for Preoperative International Normalized Ratio
+pre_inr_plot <- ggplot(data_use, aes(x = Pre_INR)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Preoperative international normalized ratio", x = "Pre INR Score", y = "Frequency")
+  labs(title = "Histogram of Preoperative International Normalized Ratio", x = "Pre INR Score", y = "Frequency")
 
-# Plotting a histogram for Preoperative partial thromboplastin time
-ggplot(data_use, aes(x = Pre_PTT)) + 
+# Histogram for Preoperative Partial Thromboplastin Time
+pre_ptt_plot <- ggplot(data_use, aes(x = Pre_PTT)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Preoperative partial thromboplastin time", x = "Pre PTT Score", y = "Frequency")
+  labs(title = "Histogram of Preoperative Partial Thromboplastin Time", x = "Pre PTT Score", y = "Frequency")
 
-# Plotting a histogram for Preoperative Fibrinogen Level (Too few data)
-#ggplot(data_use, aes(x = Pre_Fibrinogen)) + 
-  #geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  #labs(title = "Histogram of Preoperative Fibrinogen Level", x = "Pre Fibrinogen Score", y = "Frequency")
-
-# Plotting a histogram for Preoperative Creatinine Level
-ggplot(data_use, aes(x = Pre_Creatinine)) + 
+# Histogram for Preoperative Creatinine Level
+pre_creatinine_plot <- ggplot(data_use, aes(x = Pre_Creatinine)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Preoperative Creatinine Level", x = "Pre Creatinine Score", y = "Frequency")
 
-# Plotting a histogram for Intraoperative Fresh Frozen Plasma Administered
-ggplot(data_use, aes(x = intra_plasma)) + 
+# Histogram for Intraoperative Fresh Frozen Plasma Administered
+intra_plasma_plot <- ggplot(data_use, aes(x = intra_plasma)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Intraoperative Fresh Frozen Plasma Administered", x = "Intra Plasma", y = "Frequency")
 
-# Plotting a histogram for Intraoperative Packed Red Blood Cell Unit Administered
-ggplot(data_use, aes(x = intra_packed_cells)) + 
+# Histogram for Intraoperative Packed Red Blood Cell Unit Administered
+intra_packed_cells_plot <- ggplot(data_use, aes(x = intra_packed_cells)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Intraoperative Packed Red Blood Cell Unit Administered", x = "Intra Packed Cells", y = "Frequency")
 
-# Plotting a histogram for Intraoperative Platelets Unit Administered
-ggplot(data_use, aes(x = Intra_Platelets)) + 
+# Histogram for Intraoperative Platelets Unit Administered
+intra_platelets_plot <- ggplot(data_use, aes(x = Intra_Platelets)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Intraoperative Platelets Unit Administered", x = "Intra Platelets Cells", y = "Frequency")
 
-# Plotting a histogram for Intraoperative Platelets Unit Administered
-ggplot(data_use, aes(x = Intra_Platelets)) + 
-  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Intraoperative Platelets Unit Administered", x = "Intra Platelets Cells", y = "Frequency")
-
-# Plotting a histogram for Intraoperative Cryoprecipitate Unit Administered
-ggplot(data_use, aes(x = Intra_Cryoprecipitate)) + 
+# Histogram for Intraoperative Cryoprecipitate Unit Administered
+intra_cryoprecipitate_plot <- ggplot(data_use, aes(x = Intra_Cryoprecipitate)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Intraoperative Cryoprecipitate Unit Administered", x = "Intra Cryoprecipitate Cells", y = "Frequency")
 
-# Plotting a histogram for ICU stay
-ggplot(data_use, aes(x = icu_stay)) + 
+# Histogram for ICU Stay
+icu_stay_plot <- ggplot(data_use, aes(x = icu_stay)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
   labs(title = "Histogram of ICU Stay in Patients", x = "ICU Stay (Days)", y = "Frequency")
 
-# Plotting a histogram for ICU LOS (Length of Stay) - same as ICU stay, with 1 observation removed as LOS is too high
-#ggplot(data_use, aes(x = ICU_LOS)) + 
-  #geom_histogram(bins = 5, fill = "lightblue", color = "black") +
-  #labs(title = "Histogram of ICU Stay in Patients", x = "ICU Stay (Days)", y = "Frequency")
-
-# Plotting a histogram for Hospital Length of Stay
-ggplot(data_use, aes(x = HOSPITAL_LOS)) + 
+# Histogram for Hospital Length of Stay
+hospital_los_plot <- ggplot(data_use, aes(x = HOSPITAL_LOS)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Hospital Length of Stay", x = "Hospital LOS (Days)", y = "Frequency")
 
-### Flag! Study ID #51
-
-# Plotting a histogram for Total RBC Unit Transfused 72 hrs Post Surgery
-ggplot(data_use, aes(x = rbc_72_tot)) + 
+# Histogram for Total RBC Unit Transfused 72 hrs Post Surgery
+rbc_72_tot_plot <- ggplot(data_use, aes(x = rbc_72_tot)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Total RBC Unit Tranfused 72 hrs Post Surgery", x = "Total RBC Unit Tranfused", y = "Frequency")
+  labs(title = "Histogram of Total RBC Unit Transfused 72 hrs Post Surgery", x = "Total RBC Unit Transfused", y = "Frequency")
 
-# Plotting a histogram for Total Fresh Frozen Plasma Unit Transfused 72 hrs Post Surgery
-ggplot(data_use, aes(x = ffp_72_tot)) + 
+# Histogram for Total Fresh Frozen Plasma Unit Transfused 72 hrs Post Surgery
+ffp_72_tot_plot <- ggplot(data_use, aes(x = ffp_72_tot)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Total Fresh Frozen Plasma Unit Tranfused 72 hrs Post Surgery", x = "Total Fresh Frozen Plasma Unit Tranfused", y = "Frequency")
+  labs(title = "Histogram of Total Fresh Frozen Plasma Unit Transfused 72 hrs Post Surgery", x = "Total Fresh Frozen Plasma Unit Transfused", y = "Frequency")
 
-# Plotting a histogram for Total Platelets Transfused 72 hrs Post Surgery
-ggplot(data_use, aes(x = plt_72_tot)) + 
+# Histogram for Total Platelets Transfused 72 hrs Post Surgery
+plt_72_tot_plot <- ggplot(data_use, aes(x = plt_72_tot)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Total Platelets Tranfused 72 hrs Post Surgery", x = "Total Platelets Tranfused", y = "Frequency")
+  labs(title = "Histogram of Total Platelets Transfused 72 hrs Post Surgery", x = "Total Platelets Transfused", y = "Frequency")
 
-# Plotting a histogram for Total Cryoprecipitate Unit Transfused 72 hrs Post Surgery
-ggplot(data_use, aes(x = cryo_72_tot)) + 
+# Histogram for Total Cryoprecipitate Unit Transfused 72 hrs Post Surgery
+cryo_72_tot_plot <- ggplot(data_use, aes(x = cryo_72_tot)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Total Cryoprecipitate Unit Tranfused 72 hrs Post Surgery", x = "Total Cryoprecipitate Unit Tranfused", y = "Frequency")
+  labs(title = "Histogram of Total Cryoprecipitate Unit Transfused 72 hrs Post Surgery", x = "Total Cryoprecipitate Unit Transfused", y = "Frequency")
 
-# Plotting a histogram for Total RBC Unit Transfused during the first 24 Hr of surgery (including intraop and post op)
-ggplot(data_use, aes(x = tot_24_rbc)) + 
+# Histogram for Total RBC Unit Transfused during the first 24 Hr of surgery
+tot_24_rbc_plot <- ggplot(data_use, aes(x = tot_24_rbc)) + 
   geom_histogram(bins = 5, fill = "lightblue", color = "black") +
-  labs(title = "Histogram of Total RBC Unit Tranfused in the First 24 hrs of Surgery", x = "Total RBC Unit Tranfused", y = "Frequency")
+  labs(title = "Histogram of Total RBC Unit Transfused in the First 24 hrs of Surgery", x = "Total RBC Unit Transfused", y = "Frequency")
 
+#### Combined plots for categorical variables ####
+
+# Save all categorical plots in a list
+categorical_plots <- list(
+  gender_male_plot = gender_male_plot,
+  aat_deficiency_plot = aat_deficiency_plot,
+  cys_fib_plot = cys_fib_plot,
+  ipah_plot = ipah_plot,
+  ild_plot = ild_plot,
+  pulm_other_plot = pulm_other_plot,
+  cad_plot = cad_plot,
+  hypertension_plot = hypertension_plot,
+  t1d_plot = t1d_plot,
+  t2d_plot = t2d_plot,
+  gerd_pud_plot = gerd_pud_plot,
+  renal_fail_plot = renal_fail_plot,
+  stroke_plot = stroke_plot,
+  liver_disease_plot = liver_disease_plot,
+  thyroid_disease_plot = thyroid_disease_plot,
+  first_transplant_plot = first_transplant_plot,
+  redo_transplant_plot = redo_transplant_plot,
+  preop_ecls_plot = preop_ecls_plot,
+  massive_transfusion_plot = massive_transfusion_plot
+)
+
+# Generate labels (letters) for each plot
+num_cat_plots <- length(categorical_plots)
+cat_labels <- LETTERS[1:num_cat_plots]
+
+# Create figure for EDA in report
+eda_plots_cat <- ggarrange(
+  plotlist = categorical_plots, 
+  labels = cat_labels, 
+  ncol = 3, 
+  nrow = ceiling(num_cat_plots / 3), 
+  align = "hv" 
+) %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure: Exploratory Data Analysis of Categorical Variables. Each subplot shows the distribution of the respective categorical variable in the dataset.", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+eda_plots_cat
+ggsave("eda_plots_cat.png", eda_plots_cat, width = 15, height = 10, dpi = 300)
+
+#### Combined plots for continuous variables ####
+
+# Save all continuous variable plots in a list
+continuous_plots <- list(
+  las_plot = las_plot,
+  pre_hb_plot = pre_hb_plot,
+  pre_hct_plot = pre_hct_plot,
+  pre_platelets_plot = pre_platelets_plot,
+  pre_pt_plot = pre_pt_plot,
+  pre_inr_plot = pre_inr_plot,
+  pre_ptt_plot = pre_ptt_plot,
+  pre_creatinine_plot = pre_creatinine_plot,
+  intra_plasma_plot = intra_plasma_plot,
+  intra_packed_cells_plot = intra_packed_cells_plot,
+  intra_platelets_plot = intra_platelets_plot,
+  intra_cryoprecipitate_plot = intra_cryoprecipitate_plot,
+  icu_stay_plot = icu_stay_plot,
+  hospital_los_plot = hospital_los_plot,
+  rbc_72_tot_plot = rbc_72_tot_plot,
+  ffp_72_tot_plot = ffp_72_tot_plot,
+  plt_72_tot_plot = plt_72_tot_plot,
+  cryo_72_tot_plot = cryo_72_tot_plot,
+  tot_24_rbc_plot = tot_24_rbc_plot
+)
+
+# Generate labels for each plot
+num_con_plots <- length(continuous_plots)
+con_labels <- LETTERS[1:num_con_plots]  
+
+# Create figure for EDA in report
+eda_plots_con <- ggarrange(
+  plotlist = continuous_plots,
+  labels = con_labels, 
+  ncol = 3, 
+  nrow = ceiling(num_con_plots / 3), 
+  align = "hv" 
+) %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure: Exploratory Data Analysis of Continuous Variables. Each subplot shows the distribution of the respective continuous variable in the dataset.", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+eda_plots_con
+ggsave("eda_plots_con.png", eda_plots_con, width = 15, height = 10, dpi = 300)
 
 ####################################
 #####     Lasso Regression     #####
