@@ -857,13 +857,13 @@ cart_plots1 <- ggarrange(plotlist = pruned_cart_plots,
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 7. Pruned CART trees for repeated trials. Relevant characteristics/factors and their threshold/categories are shown for each of the 5 repetitions (A-E).", 
-      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+      "Figure 10. Pruned CART trees containing all available variables for repeated trials. Relevant characteristics/factors and their threshold/categories are shown for\neach of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
 cart_plots1
 
-ggsave("CART_plots.png", cart_plots1, width = 18, height = 10, dpi = 300)
+ggsave("CART_plots.png", cart_plots1, width = 12, height = 8, dpi = 300)
 
 
 cart_plots2 <- ggarrange(plotlist = pruned_cart_roc,
@@ -875,13 +875,13 @@ cart_plots2 <- ggarrange(plotlist = pruned_cart_roc,
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 8. ROC curves for 5 repeated trials of CART. Performance of the classifier is shown for each of the 5 repetitions (A-E).", 
-      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+      "Figure 11. ROC curves for 5 repeated trials of CART containing all available variables. Performance of the classifier is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
 cart_plots2
 
-ggsave("CART_plots_2.png", cart_plots2, width = 18, height = 10, dpi = 300)
+ggsave("CART_plots_2.png", cart_plots2, width = 12, height = 8, dpi = 300)
 
 ##############################################
 ##### With Literature Relevant variables #####
@@ -962,13 +962,13 @@ cart_plots3 <- ggarrange(plotlist = pruned_lit_cart_plots,
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 9. Pruned CART trees for repeated trials. Relevant literature characteristics/factors and their threshold/categories are shown for each of the 5 repetitions (A-E).", 
-      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+      "Figure 12. Pruned CART trees containing literature-relevant variables for repeated trials. Relevant literature characteristics/factors and their threshold/categories\nare shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
 cart_plots3
 
-ggsave("CART_plots_3.png", cart_plots3, width = 18, height = 10, dpi = 300)
+ggsave("CART_plots_3.png", cart_plots3, width = 12, height = 8, dpi = 300)
 
 
 cart_plots4 <- ggarrange(plotlist = pruned_lit_cart_roc,
@@ -980,13 +980,13 @@ cart_plots4 <- ggarrange(plotlist = pruned_lit_cart_roc,
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 10. ROC curves for 5 repeated trials of CART. Performance of the classifier is shown for each of the 5 repetitions (A-E).", 
-      size = 10, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+      "Figure 13. ROC curves for 5 repeated trials of CART containing literature-relevant variables. Performance of the classifier is shown for each of the 5\nrepetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
 cart_plots4
 
-ggsave("CART_plots_4.png", cart_plots4, width = 18, height = 10, dpi = 300)
+ggsave("CART_plots_4.png", cart_plots4, width = 12, height = 8, dpi = 300)
 
 ### Convert all AUCs from lasso regression and pruned trees together ###
 auc_combined_df <- rbind(lasso_auc_df, lit_lasso_auc_df, auc_df, lit_auc_df)
