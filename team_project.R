@@ -1290,6 +1290,22 @@ LR_test3
 ####################################
 #####     WILCOXON TEST CAUSE NOT NORMALLY DISTRIBUTED    #####
 ####################################
+
+#See EDA that hospital LOS and ICU LOS is not normally distributed
+# therefore t test and linear regression will not suffice as the assumptions are not met
+# since we are writing a report though we could include the linear regression stuff in the appendix but if we dont want to we just have to delete it !!!
+attach(sup_dwd)
+
+# ICU stay 
+boxplot(icu_stay~transfusion) # this is really ugly !!!
+wilcox.test(icu_stay~transfusion)
+
+# hospital stay
+boxplot(HOSPITAL_LOS~transfusion) # this is really ugly !!!
+wilcox.test(HOSPITAL_LOS~transfusion)
+
+detach(sup_dwd)
+
     
 # See EDA that hospital LOS and ICU LOS is not normally distributed
 # therefore t test and linear regression will not suffice as the assumptions are not met
