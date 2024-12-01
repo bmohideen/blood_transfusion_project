@@ -1112,7 +1112,7 @@ data_with_dead <- data_with_dead %>%
         cad, Hypertension, t2d, t1d, gerd_pud, renal_fail, stroke, liver_disease, 
         thyroid_disease, evlp, Pre_Hb, Pre_Hct, Pre_Platelets, 
         Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
-        preop_ecls, intraop_ecls, las, transfusion,  time_death, has_value, ICU_LOS, HOSPITAL_LOS,ICU_LOS, HOSPITAL_LOS,intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
+        preop_ecls, intraop_ecls, las, transfusion,  time_death, has_value, intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
         ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
         rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot)
 
@@ -1123,7 +1123,7 @@ sup_dwd <- sup_dwd %>%
          cad, Hypertension, t2d, t1d, gerd_pud, renal_fail, stroke, liver_disease, 
          thyroid_disease, evlp, Pre_Hb, Pre_Hct, Pre_Platelets, 
          Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
-         preop_ecls, intraop_ecls, las, transfusion,  time_death, has_value, ICU_LOS, HOSPITAL_LOS,intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
+         preop_ecls, intraop_ecls, las, transfusion,  time_death, has_value, intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
         ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
          rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot)
 
@@ -1234,7 +1234,11 @@ summary(coxmod2)
 # test proportional hazard
 cox.zph(coxmod2)
 
-
+# JUST THE LITERATURE ONES
+coxmod3 <- coxph(Surv(time_death, has_value==1) ~ transfusion + type + Pre_Hb + intraop_ecls + Hypertension,data=sup_dwd)
+summary(coxmod3)
+# test proportional hazard
+cox.zph(coxmod3)
     
 ####################################
 #####     WILCOXON TEST   #####
