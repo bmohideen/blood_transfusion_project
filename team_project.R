@@ -1025,7 +1025,7 @@ auc_avg_df
 data_use <- data_use %>%
   mutate(transfusion = if_else(
     rowSums(across(c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
-                     rbc_72_tot, ffp_72_tot, plt_72_tot, cryo_72_tot))) == 0, 0, 1
+                     rbc_72_tot, ffp_72_tot, plt_72_tot, cryo_72_tot))) == 0, "0", "1"
   ))
 
 
@@ -1239,57 +1239,15 @@ LR_test1
 # citation in report (from https://pmc.ncbi.nlm.nih.gov/articles/PMC5045274/#:~:text=The%20choice%20of%20an%20adequate,events%20per%20variable%20(EPV).)
 # this will be a significant limitation as there are only 23 events -> would be limited to 2 variables but that seems very small 
 ## any more may be subject to overfitting or estimates that are highly sensitive to small changes 
-### DO I NEED TO CHECK FOR COLLINEARITY?? !!!
-# Run a Cox proportional hazard model including variables found to be relevant in Question 1 Lasso regression (all) - see report !!! 
-coxmod1 <- coxph(Surv(time_death, has_value==1) ~ transfusion + Type + ipah + pulm_other + Hypertension + t2d + gerd_pud + stroke 
-                   + Pre_Hb + Pre_Platelets + Pre_INR + redo_transplant + intraop_ecls + las, data=sup_dwd)
-summary(coxmod1)
-## SEE LIT -> Hmm concerning cause a nothing seems to be relevant 
-## warning is concerning!! 
-## maybe aslo add relevant predictors from the first quetsion !!!
-# test proportional hazard
-cox.zph(coxmod1)
 
-# see if this is any better 
-coxmod2 <- coxph(Surv(time_death, has_value==1) ~ transfusion + gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
-                 + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot +  Pre_Hb + intraop_ecls,data=sup_dwd)
+# Run a Cox proportional hazard model including variables found to be relevant in Question 1 Lasso regression (all) - see report !!! 
+coxmod1 <- coxph(Surv(time_death, has_value==1) ~ transfusion + intraop_ecls + Pre_Hb + Pre_Platelets + redo_transplant,data=sup_dwd)
+# warning that suggest redo_transplant has too few observations in the redo category
+# therefore remove it
+coxmod2 <- coxph(Surv(time_death, has_value==1) ~ transfusion + intraop_ecls + Pre_Hb + Pre_Platelets ,data=sup_dwd)
 summary(coxmod2)
 # test proportional hazard
 cox.zph(coxmod2)
-
-# see if this is any better - did all the ones from model 1 and model 2
-# DLEETE THE ONES THAT GO INFINITE FOR THE 95% CI?
-coxmod4 <- coxph(Surv(time_death, has_value==1) ~ transfusion + gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
-                 + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot  + Type + ipah + pulm_other + Hypertension + t2d + gerd_pud + stroke + 
-                   + Pre_Hb + Pre_Platelets + Pre_INR + redo_transplant + intraop_ecls + las ,data=sup_dwd)
-summary(coxmod4)
-
-library(car)
-vif(coxmod4)
-# test proportional hazard
-cox.zph(coxmod4)
-
-# see if this is any better - did all the ones from lasso model that appeared 5 times 
-# DLEETE THE ONES THAT GO INFINITE FOR THE 95% CI?
-coxmod5 <- coxph(Surv(time_death, has_value==1) ~ transfusion + intraop_ecls + Pre_Hb ,data=sup_dwd)
-summary(coxmod5)
-# test proportional hazard
-cox.zph(coxmod5)
-
-coxmod6 <- coxph(Surv(time_death, has_value==1) ~ transfusion,data=sup_dwd)
-summary(coxmod6)
-# test proportional hazard
-cox.zph(coxmod6)
-
-coxmod7 <- coxph(Surv(time_death, has_value==1) ~ transfusion + intraop_ecls + Pre_Hb + Pre_Platelets + redo_transplant,data=sup_dwd)
-summary(coxmod7)
-# test proportional hazard
-cox.zph(coxmod7)
-
-coxmod8<- coxph(Surv(time_death, has_value==1) ~ transfusion + intraop_ecls + Pre_Hb + Pre_Platelets ,data=sup_dwd)
-summary(coxmod8)
-# test proportional hazard
-cox.zph(coxmod8)
 
 
 #########################################
