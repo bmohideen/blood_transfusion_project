@@ -1111,32 +1111,36 @@ A5 <- ggplot(sup_dwd, aes(x = time_death)) +
 # SHOULD I ALSO REMOVE ALIVE 30 DAYS, 90 DAYS and 1 YEAR? !!!
 data_with_dead <- data_with_dead %>%
   mutate(type = if_else(Type == "Bilateral", "Double", "Single")) %>% # modifying type to single or double transplant
-      select(type, gender_male, aat_deficiency, cys_fib, ipah, 
-             ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud, renal_fail, stroke, 
-             liver_disease, thyroid_disease, redo_transplant, evlp, preop_ecls,
-             las, Pre_Hb, Pre_Hct, Pre_Platelets, Pre_PT, Pre_INR, Pre_PTT, Pre_Creatinine,
-             intraop_ecls, ECLS_ECMO, ECLS_CPB, intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
-             icu_stay, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
-             rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot,
-             tot_24_rbc, massive_transfusion, Age, BMI, time_death, has_value, transfusion)
+      select(Age, type, aat_deficiency, ECLS_CPB, ECLS_ECMO, cys_fib, ipah, ild, pulm_other, 
+        cad, Hypertension, t2d, t1d, gerd_pud, renal_fail, stroke, liver_disease, 
+        thyroid_disease, evlp, Pre_Hb, Pre_Hct, Pre_Platelets, 
+        Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
+        preop_ecls, intraop_ecls, las, transfusion,  time_death, has_value, ICU_LOS, HOSPITAL_LOS,)
 
 # same for sup_dwd 
 sup_dwd <- sup_dwd %>%
   mutate(type = if_else(Type == "Bilateral", "Double", "Single")) %>% # modifying type to single or double transplant
-  select(type, gender_male, aat_deficiency, cys_fib, ipah, 
-         ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud, renal_fail, stroke, 
-         liver_disease, thyroid_disease, redo_transplant, evlp, preop_ecls,
-         las, Pre_Hb, Pre_Hct, Pre_Platelets, Pre_PT, Pre_INR, Pre_PTT, Pre_Creatinine,
-         intraop_ecls, ECLS_ECMO, ECLS_CPB, intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
-         icu_stay, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
-         rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot,
-         tot_24_rbc, massive_transfusion, Age, BMI, time_death, has_value, transfusion)
+  select(Age, type, aat_deficiency, ECLS_CPB, ECLS_ECMO, cys_fib, ipah, ild, pulm_other, 
+         cad, Hypertension, t2d, t1d, gerd_pud, renal_fail, stroke, liver_disease, 
+         thyroid_disease, evlp, Pre_Hb, Pre_Hct, Pre_Platelets, 
+         Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
+         preop_ecls, intraop_ecls, las, transfusion,  time_death, has_value, ICU_LOS, HOSPITAL_LOS,)
 # included everything from the Lasso model -> plus blood transfusion information essentially 
 #Age, type, aat_deficiency, ECLS_CPB, ECLS_ECMO, cys_fib, ipah, ild, pulm_other, 
 #cad, Hypertension, t2d, t1d, gerd_pud, renal_fail, stroke, liver_disease, 
 #thyroid_disease, evlp, Pre_Hb, Pre_Hct, Pre_Platelets, 
 #Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
 #preop_ecls, intraop_ecls, las, transfusion)
+
+# FROM BEFORE DELETE 
+#type, gender_male, aat_deficiency, cys_fib, ipah, 
+#ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud, renal_fail, stroke, 
+#liver_disease, thyroid_disease, redo_transplant, evlp, preop_ecls,
+#las, Pre_Hb, Pre_Hct, Pre_Platelets, Pre_PT, Pre_INR, Pre_PTT, Pre_Creatinine,
+#intraop_ecls, ECLS_ECMO, ECLS_CPB, intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
+#icu_stay, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
+#rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot,
+#tot_24_rbc, massive_transfusion, Age, BMI, time_death, has_value, transfusion
 
 ### ASK TRINELY !!! - from the model results of the coefficients with all we did not include
 # liver_disease, Pre_Hct -> OTHERS CHECK BUT JUST COPY PASTE?? !!! 
@@ -1250,69 +1254,6 @@ summary(coxmod2)
 cox.zph(coxmod2)
 
 
-#########################################
-##### Secondary Survival Analysis #####
-#########################################
-# done on data_with_dead dataset -> performed for supplementary methods and interest
-
-# create an unstratified Kaplan-Meier estimate 
-sf1 <- survfit(Surv(time_death, has_value==1)~1, data=data_with_dead)
-    
-# Kaplan-Meier Curve
-plot(sf1,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95) 
-    
-# create a stratified surivival anlysis - CAN I OR SHOULD I DO THIS !!! probably cause log rank is looking at this right 
-sf3 <- survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead)
-    
-# Kaplan-Meier Curve 
-plot(sf3,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95, col=1:2, fun = "S") 
-legend("topright",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
-    
-# Preform the log-rank test
-# must first check the proportional hazard assumption using function set to "cloglog"
-# plot a cloglog plot against log(t)
-plot(survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead), fun = "cloglog", col=1:2, xlab = "Time (days)", ylab="log[log(Survival probability)]")
-# add a legend with col to distinguish levels
-legend("topleft",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
-    
-# Run the log-rank test 
-LR_test3 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=data_with_dead)
-LR_test3
-    
-# Run a Cox proportional hazard model including variables related to the patient (orange) and blood transfused into the patients and their 72 hour stats (yellow)
-# Should i be including like a LOT of other things !!! -> do i check for multicollinearity?
-coxmod3 <- coxph(Surv(time_death, has_value==1) ~ transfusion + gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
-                     + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot, data=data_with_dead)
-summary(coxmod3)
-## SEE LIT -> HYPERTENSION AND ANEMIA !!!
-## maybe aslo add relevant predictors from the first quetsion !!!
-    
-##### Stratify by if they got a transfusion #####
-### MAIN ANALYSIS !!!
-# potential limitation is that the amount of people who got the transfusion may be rather small...
-table(data_with_dead$transfusion)
-nrow(data_with_dead)
-67/192 #0.3489583 -> small percentage 
-125/192
-    
-sf3 <- survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead)
-# add a plot
-plot(sf3, xlab = "Time (days)", ylab="Survival", conf.int = 0.95) ## Add a confidence interval 
-    
-# see plot for where 0.5 is or something if we want to include this graph we can 
-    
-# Kaplan-Meier Curve
-plot(sf3,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", col=1:2) 
-legend("topright",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:3) 
-    
-# Cox model 
-coxmod3 <- coxph(Surv(time_death, has_value==1) ~ gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
-                     + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot, data=data_with_dead)
-summary(coxmod3)
-    
-# do log rank test as well to compare transfusion or not transfusion 
-LR_test3 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=data_with_dead)
-LR_test3
     
 ####################################
 #####     WILCOXON TEST CAUSE NOT NORMALLY DISTRIBUTED    #####
@@ -1324,8 +1265,8 @@ LR_test3
 attach(sup_dwd)
 
 # ICU stay 
-boxplot(icu_stay~transfusion) # this is really ugly !!!
-wilcox.test(icu_stay~transfusion)
+boxplot(ICU_LOS~transfusion) # this is really ugly !!!
+wilcox.test(ICU_LOS~transfusion)
 
 # hospital stay
 boxplot(HOSPITAL_LOS~transfusion) # this is really ugly !!!
@@ -1334,6 +1275,70 @@ wilcox.test(HOSPITAL_LOS~transfusion)
 detach(sup_dwd)
 
 ##### ANYTHING FROM HERE CAN PROBABLY BE DELETED DEPENDING ON WHAT WE WANT AS SUP MATERIAL #####
+
+#########################################
+##### Secondary Survival Analysis #####
+#########################################
+# done on data_with_dead dataset -> performed for supplementary methods and interest
+
+# create an unstratified Kaplan-Meier estimate 
+sf1 <- survfit(Surv(time_death, has_value==1)~1, data=data_with_dead)
+
+# Kaplan-Meier Curve
+plot(sf1,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95) 
+
+# create a stratified surivival anlysis 
+sf3 <- survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead)
+
+# Kaplan-Meier Curve 
+plot(sf3,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95, col=1:2, fun = "S") 
+legend("bottomleft",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
+
+# Preform the log-rank test
+# must first check the proportional hazard assumption using function set to "cloglog"
+# plot a cloglog plot against log(t)
+plot(survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead), fun = "cloglog", col=1:2, xlab = "Time (days)", ylab="log[log(Survival probability)]")
+# add a legend with col to distinguish levels
+legend("topleft",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
+
+# Run the log-rank test 
+LR_test3 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=data_with_dead)
+LR_test3
+
+# Run a Cox proportional hazard model including variables related to the patient (orange) and blood transfused into the patients and their 72 hour stats (yellow)
+# Should i be including like a LOT of other things !!! -> do i check for multicollinearity?
+coxmod3 <- coxph(Surv(time_death, has_value==1) ~ transfusion + gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
+                 + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot, data=data_with_dead)
+summary(coxmod3)
+## SEE LIT -> HYPERTENSION AND ANEMIA !!!
+## maybe aslo add relevant predictors from the first quetsion !!!
+
+##### Stratify by if they got a transfusion #####
+### MAIN ANALYSIS !!!
+# potential limitation is that the amount of people who got the transfusion may be rather small...
+table(data_with_dead$transfusion)
+nrow(data_with_dead)
+67/192 #0.3489583 -> small percentage 
+125/192
+
+sf3 <- survfit(Surv(time_death, has_value==1)~transfusion, data=data_with_dead)
+# add a plot
+plot(sf3, xlab = "Time (days)", ylab="Survival", conf.int = 0.95) ## Add a confidence interval 
+
+# see plot for where 0.5 is or something if we want to include this graph we can 
+
+# Kaplan-Meier Curve
+plot(sf3,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", col=1:2) 
+legend("topright",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:3) 
+
+# Cox model 
+coxmod3 <- coxph(Surv(time_death, has_value==1) ~ gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
+                 + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot, data=data_with_dead)
+summary(coxmod3)
+
+# do log rank test as well to compare transfusion or not transfusion 
+LR_test3 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=data_with_dead)
+LR_test3
     
 # See EDA that hospital LOS and ICU LOS is not normally distributed
 # therefore t test and linear regression will not suffice as the assumptions are not met
