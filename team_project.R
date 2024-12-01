@@ -1054,22 +1054,25 @@ sup_dwd <- data_with_dead  %>%
 sup_dwd <- sup_dwd %>%
 mutate(
 has_value = if_else(is.na(has_value), 0, has_value))
+
+# duplicate data_with_dead before modification of time to death to account for censoring for creating plot A3
+uc_dwd <- data_with_dead
     
 # add the new variables to the EDA -> for results 
     # Patient deaths (from has_value)
-ggplot(data_with_dead, aes(x = factor(has_value))) +
+A1 <- ggplot(data_with_dead, aes(x = factor(has_value))) +
       geom_bar(fill = "lightblue", color = "black") +
       labs(title = "Bar Plot of Known Patients Deaths", x = "Patient Death (1 = Yes, 0 = No)", y = "Count")
 table(data_with_dead$has_value)
 
 # Patient deaths (from has_value) in sup_dwd dataset -> this is to show number of patients that died before 1 year
-ggplot(sup_dwd, aes(x = factor(has_value))) +
+A2 <- ggplot(sup_dwd, aes(x = factor(has_value))) +
   geom_bar(fill = "lightblue", color = "black") +
   labs(title = "Bar Plot of Known Patients Deaths", x = "Patient Death (1 = Yes, 0 = No)", y = "Count")
 table(sup_dwd$has_value)
     
 # time to death - only for those who died 
-ggplot(data_with_dead, aes(x = time_death)) + 
+A3 <- ggplot(uc_dwd, aes(x = time_death)) + 
       geom_histogram(bins = 10, fill = "lightblue", color = "black") +
       labs(title = "Histogram of Patient Time to Death", x = "Time to Death (days)", y = "Frequency")
     
@@ -1091,12 +1094,12 @@ sup_dwd <- sup_dwd %>%
     time_death = if_else((time_death > 365), 365, time_death))
     
 # time to death - including censored at 365 days - DEATH_DATE data set 
-ggplot(data_with_dead, aes(x = time_death)) + 
+A4 <- ggplot(data_with_dead, aes(x = time_death)) + 
       geom_histogram(bins = 10, fill = "lightblue", color = "black") +
       labs(title = "Histogram of Patient Time to Death", x = "Time to Death (days)", y = "Frequency")
     
 # time to death - including censored at 365 days - sup_dwd dataset 
-ggplot(sup_dwd, aes(x = time_death)) + 
+A5 <- ggplot(sup_dwd, aes(x = time_death)) + 
   geom_histogram(bins = 10, fill = "lightblue", color = "black") +
   labs(title = "Histogram of Patient Time to Death", x = "Time to Death (days)", y = "Frequency")
     
@@ -1128,10 +1131,34 @@ sup_dwd <- sup_dwd %>%
          icu_stay, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
          rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot,
          tot_24_rbc, massive_transfusion, Age, BMI, time_death, has_value, transfusion)
+# included everything from the Lasso model -> plus blood transfusion information essentially 
+#Age, type, aat_deficiency, ECLS_CPB, ECLS_ECMO, cys_fib, ipah, ild, pulm_other, 
+#cad, Hypertension, t2d, t1d, gerd_pud, renal_fail, stroke, liver_disease, 
+#thyroid_disease, evlp, Pre_Hb, Pre_Hct, Pre_Platelets, 
+#Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
+#preop_ecls, intraop_ecls, las, transfusion)
 
 ### ASK TRINELY !!! - from the model results of the coefficients with all we did not include
 # liver_disease, Pre_Hct -> OTHERS CHECK BUT JUST COPY PASTE?? !!! 
 ### SO SHOULD I KEEP THEM IN HERE OR REMOVE????
+
+#### get the Q2 EDA plots into one figure for simplicity 
+# store the plots in a list
+q2_eda <- list(A1, A2, A3, A4, A5)
+q2eda_plots <- ggarrange(plotlist = q2_eda,
+                             labels = c("A", "B", "C", "D", "E"),
+                             ncol = 3,
+                             nrow = 2,
+                             align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure #. Exploratory data analysis for additional variables required for surivival analysis. A) & B) bar plots of patient deaths (X-axis) counts (Y-axis) for pateints that died at any time and before 1 year, respectively. 
+      C), D), & E) histograms showing time to death (X-axis) and frequency (Y-axis) for only patients who died, patients who died or were censored at 365 days, and pateints who died before 365 days or were censored at 365 days, respectively", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+q2eda_plots
+ggsave("q2eda_plots.png", q2eda_plots, width = 12, height = 8, dpi = 300)
 
 #########################################
 ##### Primary Survival Analysis #####
@@ -1139,20 +1166,60 @@ sup_dwd <- sup_dwd %>%
 # done on sup_dwd dataset
 # add the library required for the survival analysis 
 library(survival)
+library(survminer)
 
 ##### Kaplan-Meier Survival Curves #####
 # create an unstratified Kaplan-Meier estimate 
 s1 <- survfit(Surv(time_death, has_value==1)~1, data=sup_dwd)
 
-# Kaplan-Meier Curve
-plot(s1,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95) 
+# Kaplan-Meier Curve with ggplot 
+# modify the y axis to only show probabilities above 0.8 since otherwise steps are not visible 
+s1plot <- ggsurvplot(
+  s1,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  conf.int = TRUE,
+  conf.int.style = "step", # dotted for confidence intervals
+  legend = "none",         # remove legend since not stratified
+  ylim = c(0.8, 1),
+  ggtheme = theme_minimal() # minimal theme
+)
 
 # create a stratified surivival anlysis - vsiual for log rank test
 s3 <- survfit(Surv(time_death, has_value==1)~transfusion, data=sup_dwd)
 
-# Kaplan-Meier Curve 
-plot(s3,xscale = 365.25, xlab = "Time (years)", ylab="Survival Probability", conf.int = 0.95, col=1:2, fun = "S") 
-legend("topright",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
+# Kaplan-Meier Curve for stratified
+s3plot <- ggsurvplot(
+  s3,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  conf.int = TRUE,
+  conf.int.style = "step", # dotted for confidence intervals
+  palette = c("#E41A1C", "#377EB8"), # add colors for the stratified groups
+  legend.title = "Transfusion",
+  legend.labs = c("Yes", "No"), # add legend labels
+  ggtheme = theme_minimal()
+)
+
+##### get the Kaplan-Meier Curves into one figure for simplicity 
+# Extract ggplot objects from ggsurvplot objects
+s1plot <- s1plot$plot
+s3plot <- s3plot$plot
+# store the plots in a list
+q2_km <- list(s1plot, s3plot)
+q2km_plots <- ggarrange(plotlist = q2_km,
+                         labels = c("A", "B"),
+                         ncol = 2,
+                         nrow = 1,
+                         align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Figure #. Kaplan-Meier curves of survival estimate with the X-axis representing the time (in days) and the Y-axis showing the survival probaility beginning at 0.8. A) unstratified. B) stratified by whether or not pateints got blood transfusions.", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+q2km_plots
+ggsave("q2km_plots.png", q2km_plots, width = 12, height = 8, dpi = 300)
 
 ##### Log Rank Test #####
 # must first check the proportional hazard assumption using function set to "cloglog"
