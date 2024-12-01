@@ -1197,6 +1197,7 @@ s3plot <- ggsurvplot(
   conf.int.style = "step", # dotted for confidence intervals
   palette = c("#E41A1C", "#377EB8"), # add colors for the stratified groups
   legend.title = "Transfusion",
+  ylim = c(0.8, 1),
   legend.labs = c("Yes", "No"), # add legend labels
   ggtheme = theme_minimal()
 )
@@ -1214,7 +1215,8 @@ q2km_plots <- ggarrange(plotlist = q2_km,
                          align = "hv") %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure #. Kaplan-Meier curves of survival estimate with the X-axis representing the time (in days) and the Y-axis showing the survival probaility beginning at 0.8. A) unstratified. B) stratified by whether or not pateints got blood transfusions.", 
+      "Figure #. Kaplan-Meier curves of survival estimate with the X-axis representing the time (in days) and the Y-axis showing the survival probaility beginning at 0.8. 
+      A) unstratified. B) stratified by whether or not pateints got blood transfusions.", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
