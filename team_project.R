@@ -1018,10 +1018,7 @@ auc_avg_df
 ##### Loading and Preparing the Data #####
 #########################################
 
-# Anything that has !!! means it needs review (by group)
-# In conjunction with the above, what is the impact of transfusion on patient outcomes, including mortality? #
-
-# Modify data_use to include the transfusion binary indicator (as done prevoiusly for lasso regression)
+# Modify data_use to include the transfusion binary indicator (as done previously for lasso regression)
 data_use <- data_use %>%
   mutate(transfusion = if_else(
     rowSums(across(c(intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
@@ -1030,13 +1027,14 @@ data_use <- data_use %>%
 
 
 # create a death variable in data_use and a new data frame for the analysis
-# the death variable indicates if DEATH_DATE has a value, where 1 indicates the patinet is known to have died and 0 indicates they are censored
+# the death variable indicates if DEATH_DATE has a value, where 1 indicates the patient is known to have died and 0 indicates they are censored
 data_with_dead <- data_use %>%
   mutate(has_value = if_else(!is.na(data_use$DEATH_DATE), "1", "0"))
 # convert to numeric
 data_with_dead$has_value <- as.numeric(data_with_dead$has_value)
 
 # convert both death date and OR date into POSIXct form
+# create a new variable called time_death that is the difference between these two, aka the time to death
 data_with_dead <- data_with_dead %>%
   mutate(
     DEATH_DATE = as.POSIXct(DEATH_DATE, format = "%d-%b-%Y"), #convert to POSIX form
@@ -1044,7 +1042,7 @@ data_with_dead <- data_with_dead %>%
     time_death = as.numeric(difftime(DEATH_DATE, or_date, units = "days"))
   )
 
-# since censoring occurs at one year and some of the pateints die after a year include only those who died 
+# since censoring occurs at one year and some of the patients die after a year include only those who died 
 # during the first year in the analysis 
 sup_dwd <- data_with_dead  %>%
   mutate(has_value = if_else((data_with_dead$time_death < 365),"1","0"))
@@ -1108,14 +1106,15 @@ A5 <- ggplot(sup_dwd, aes(x = time_death)) +
 # removed or_date and DEATH_DATE -> represented in time_death
 # removed first transplant since it is the same as redo transplant 
 # remove due to high missingness: pre_fibrinogen, rbc_0_24, rbc_24_48, rbc_48_72, ffp_0_24, ffp_24_48, ffp_48_72, plt_0_24, plt_24_48, plt_48_72, cryo_0_24, cryo_24_48, cyro_48_72
-# SHOULD I ALSO REMOVE ALIVE 30 DAYS, 90 DAYS and 1 YEAR? !!!
 data_with_dead <- data_with_dead %>%
   mutate(type = if_else(Type == "Bilateral", "Double", "Single")) %>% # modifying type to single or double transplant
       select(Age, type, aat_deficiency, ECLS_CPB, ECLS_ECMO, cys_fib, ipah, ild, pulm_other, 
         cad, Hypertension, t2d, t1d, gerd_pud, renal_fail, stroke, liver_disease, 
         thyroid_disease, evlp, Pre_Hb, Pre_Hct, Pre_Platelets, 
         Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
-        preop_ecls, intraop_ecls, las, transfusion,  time_death, has_value, ICU_LOS, HOSPITAL_LOS,)
+        preop_ecls, intraop_ecls, las, transfusion,  time_death, has_value, ICU_LOS, HOSPITAL_LOS,ICU_LOS, HOSPITAL_LOS,intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
+        ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
+        rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot)
 
 # same for sup_dwd 
 sup_dwd <- sup_dwd %>%
@@ -1124,27 +1123,9 @@ sup_dwd <- sup_dwd %>%
          cad, Hypertension, t2d, t1d, gerd_pud, renal_fail, stroke, liver_disease, 
          thyroid_disease, evlp, Pre_Hb, Pre_Hct, Pre_Platelets, 
          Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
-         preop_ecls, intraop_ecls, las, transfusion,  time_death, has_value, ICU_LOS, HOSPITAL_LOS,)
-# included everything from the Lasso model -> plus blood transfusion information essentially 
-#Age, type, aat_deficiency, ECLS_CPB, ECLS_ECMO, cys_fib, ipah, ild, pulm_other, 
-#cad, Hypertension, t2d, t1d, gerd_pud, renal_fail, stroke, liver_disease, 
-#thyroid_disease, evlp, Pre_Hb, Pre_Hct, Pre_Platelets, 
-#Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
-#preop_ecls, intraop_ecls, las, transfusion)
-
-# FROM BEFORE DELETE 
-#type, gender_male, aat_deficiency, cys_fib, ipah, 
-#ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud, renal_fail, stroke, 
-#liver_disease, thyroid_disease, redo_transplant, evlp, preop_ecls,
-#las, Pre_Hb, Pre_Hct, Pre_Platelets, Pre_PT, Pre_INR, Pre_PTT, Pre_Creatinine,
-#intraop_ecls, ECLS_ECMO, ECLS_CPB, intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
-#icu_stay, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
-#rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot,
-#tot_24_rbc, massive_transfusion, Age, BMI, time_death, has_value, transfusion
-
-### ASK TRINELY !!! - from the model results of the coefficients with all we did not include
-# liver_disease, Pre_Hct -> OTHERS CHECK BUT JUST COPY PASTE?? !!! 
-### SO SHOULD I KEEP THEM IN HERE OR REMOVE????
+         preop_ecls, intraop_ecls, las, transfusion,  time_death, has_value, ICU_LOS, HOSPITAL_LOS,intra_plasma, intra_packed_cells, Intra_Platelets, Intra_Cryoprecipitate,
+        ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN, ICU_LOS, HOSPITAL_LOS,
+         rbc_72_tot,ffp_72_tot, plt_72_tot, cryo_72_tot)
 
 #### get the Q2 EDA plots into one figure for simplicity 
 # store the plots in a list
@@ -1256,7 +1237,7 @@ cox.zph(coxmod2)
 
     
 ####################################
-#####     WILCOXON TEST CAUSE NOT NORMALLY DISTRIBUTED    #####
+#####     WILCOXON TEST   #####
 ####################################
 
 #See EDA that hospital LOS and ICU LOS is not normally distributed
