@@ -1333,6 +1333,7 @@ wilcox.test(HOSPITAL_LOS~transfusion)
 
 detach(sup_dwd)
 
+##### ANYTHING FROM HERE CAN PROBABLY BE DELETED DEPENDING ON WHAT WE WANT AS SUP MATERIAL #####
     
 # See EDA that hospital LOS and ICU LOS is not normally distributed
 # therefore t test and linear regression will not suffice as the assumptions are not met
