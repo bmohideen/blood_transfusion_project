@@ -76,7 +76,7 @@ data <- data_orig %>%
 
 # Select the relevant data
 data_use <- data %>%
-  select(Type, study_id, tx_db_id, or_date, gender_male, aat_deficiency, cys_fib, ipah, 
+  select(Type, study_id, tx_db_id, or_date, gender_male, COPD, aat_deficiency, cys_fib, ipah, 
          ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud, renal_fail, stroke, 
          liver_disease, thyroid_disease, first_transplant, redo_transplant, evlp, preop_ecls,
          las, Pre_Hb, Pre_Hct, Pre_Platelets, Pre_PT, Pre_INR, Pre_PTT, Pre_Fibrinogen, Pre_Creatinine,
@@ -124,7 +124,7 @@ ncol(data_use)
 #####################################
 
 # Specify the categorical variables
-categorical_vars <- c("type", "gender_male", "aat_deficiency", "cys_fib", "ipah", "ild", "pulm_other",
+categorical_vars <- c("type", "gender_male", "COPD", "aat_deficiency", "cys_fib", "ipah", "ild", "pulm_other",
                       "cad", "Hypertension", "t1d", "t2d", "gerd_pud", "renal_fail", "stroke",
                       "liver_disease", "thyroid_disease", "first_transplant", "redo_transplant",
                       "evlp", "preop_ecls", "intraop_ecls", "ECLS_ECMO", "ECLS_CPB", "ALIVE_30DAYS_YN",
@@ -148,6 +148,113 @@ table_one <- CreateTableOne(vars = all_vars, data = data_use, factorVars = categ
 
 # View the summary statistics
 summary(table_one, digits =2)
+
+# Create summary table for categorical variables
+baseline_summ <- data_use %>%
+  select(66, 5, 67, 68, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 26, 27, 28, 29, 30, 31, 33, 24, 21) %>%
+  mutate(
+    gender_male = ifelse(gender_male == TRUE, "Male", "Female"),
+    across(
+      c(COPD, aat_deficiency, cys_fib, ipah, ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud,
+        renal_fail, stroke, liver_disease, thyroid_disease, preop_ecls, first_transplant),
+      ~ ifelse(. == TRUE, "Yes", "No")
+    )
+  ) %>%
+  tbl_summary(
+    type = list(all_continuous() ~ "continuous",
+              all_categorical() ~ "categorical"),
+    statistic = all_continuous() ~ "{mean} ({sd})",
+    digits = all_continuous() ~ 2,
+    missing_text = "(Missing)",
+    label = list(
+      Age = "Age (years)",
+      gender_male = "Gender",
+      type = "Transplant Type",
+      aat_deficiency = "AAT Deficiency",
+      cys_fib = "Cystic Fibrosis",
+      ipah = "Idiopathic Pulmonary Hypertension",
+      ild = "Interstitial Lung Disease",
+      pulm_other = "Other",
+      cad = "Coronary Artery Disease",
+      t1d = "Type 1 Diabetes",
+      t2d = "Type 2 Diabetes",
+      gerd_pud = "GERD/PUD",
+      renal_fail = "Renal Failure",
+      stroke = "Stroke",
+      liver_disease = "Liver Disease",
+      thyroid_disease = "Thyroid Disease",
+      las = "Lung Allocation Score",
+      Pre_Hb = "Hemoglobin",
+      Pre_Hct = "Hematocrit",
+      Pre_Platelets = "Platelets",
+      Pre_PT = "Prothrombin",
+      Pre_INR = "International Normalized Ratio",
+      Pre_PTT = "Partial Thromboplastin Time",
+      Pre_Fibrinogen = "Fibrinogen",
+      Pre_Creatinine = "Creatinine",
+      preop_ecls = "ECLS Use",
+      first_transplant = "First Transplant"
+      )
+    ) %>%
+  modify_table_body(
+    mutate,
+    groupname_col = case_when(variable %in% c("Age", "gender_male", "BMI", "type") ~ "Demographics",
+                              variable %in% c("COPD", "aat_deficiency", "cys_fib", "ipah", "ild", "pulm_other") ~ "Primary Diagnoses",
+                              variable %in% c("cad", "Hypertension", "t1d", "t2d", 
+                              "gerd_pud", "renal_fail", "stroke", "liver_disease", "thyroid_disease") ~ "Comorbidities",
+                              variable %in% c("las", "Pre_Hb", "Pre_Hct", "Pre_Platelets", "Pre_PT", "Pre_INR", "Pre_PTT", "Pre_Fibrinogen", "Pre_Creatinine", "preop_ecls") ~ "Preoperative Status",
+                              variable %in% c("first_transplant") ~ "Transplant History")
+    ) %>%
+  modify_caption(caption = "**Table 1.** Baseline characteristics of lung transplant patients.")
+baseline_summ
+
+# Create summary table for operative and postoperative outcomes
+op_postop_summ <- data_use %>%
+  select(23, 34, 35, 36, 37, 38, 39, 40, 43, 44, 45, 41, 47, 65) %>%
+  mutate(
+    across(
+      c(evlp, intraop_ecls, ECLS_ECMO, ECLS_CPB),
+      ~ ifelse(. == TRUE, "Yes", "No")
+      ),
+    across(
+      c(ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN),
+      ~ ifelse(. == "Y", "Yes", "No")
+      ),
+    massive_transfusion = ifelse(massive_transfusion == 1, "Yes", "No")
+  ) %>%
+  tbl_summary(
+    type = list(all_continuous() ~ "continuous",
+                all_categorical() ~ "categorical"),
+    statistic = all_continuous() ~ "{mean} ({sd})",
+    digits = all_continuous() ~ 2,
+    missing_text = "(Missing)",
+    label = list(
+      evlp = "Ex Vivo Lung Perfusion",
+      intraop_ecls = "Intraoperative ECLS", 
+      ECLS_ECMO = "Extracorporeal Membrane Oxygenation", 
+      ECLS_CPB = "Cardiopulmonary Bypass",
+      intra_plasma = "Plasma",
+      intra_packed_cells = "Packed Cells",
+      Intra_Platelets = "Platelets",
+      Intra_Cryoprecipitate = "Cryoprecipiate",
+      icu_stay = "Length of ICU Stay",
+      ALIVE_30DAYS_YN = "30-Day",
+      ALIVE_90DAYS_YN = "90-Day", 
+      ALIVE_12MTHS_YN = "12-Month",
+      HOSPITAL_LOS = "Length of Hospital Stay",
+      massive_transfusion = "Massive Transfusion"
+    )
+  ) %>%
+  modify_table_body(
+    mutate,
+    groupname_col = case_when(variable %in% c("evlp", "intraop_ecls", "ECLS_ECMO", "ECLS_CPB") ~ "Operative Factors",
+                              variable %in% c("intra_plasma", "intra_packed_cells", "Intra_Platelets", "Intra_Cryoprecipitate", "massive_transfusion") ~ "Blood Products",
+                              variable %in% c("ALIVE_30DAYS_YN", "ALIVE_90DAYS_YN", "ALIVE_12MTHS_YN") ~ "Survival",
+                              variable %in% c("icu_stay", "HOSPITAL_LOS") ~ "Hospital Stay Metrics"
+  )
+  ) %>%
+  modify_caption(caption = "**Table 2.** Operative and Postoperative Outcomes of lung transplant patients.")
+op_postop_summ
 
 ###### Prepare the tables so that they look pretty for the report #####
 # Install gridExtra
@@ -174,27 +281,6 @@ dev.off()
 
 # Load necessary libraries
 library(ggplot2)
-
-# Loop through categorical variables
-# for (cat_var in categorical_vars) {
-  # Create a bar plot
-  # p <- ggplot(data_use, aes_string(x = cat_var)) +
-    # geom_bar(fill = "lightblue", color = "black") +
-    # labs(
-      # title = paste("Frequency Bar Plot of", cat_var),
-      # x = cat_var,
-      # y = "Frequency"
-    # ) +
-    # theme_minimal() +
-    # theme(
-      # axis.text.x = element_text(angle = 45, hjust = 1),
-      # plot.title = element_text(hjust = 0.5, size = 14)
-    # )
-  
-  # Print the plot
-  # print(p)
-# }
-
 
 #### Plots for categorical variables ####
 
@@ -695,7 +781,7 @@ data_use_lasso_all <- data_use %>%
   ) %>% 
   select(Age, type, aat_deficiency, ECLS_CPB, ECLS_ECMO, cys_fib, ipah, ild, pulm_other, 
          cad, Hypertension, t2d, t1d, gerd_pud, renal_fail, stroke, liver_disease, 
-         thyroid_disease, evlp, Pre_Hb, Pre_Hct, Pre_Platelets, 
+         thyroid_disease, evlp, Pre_Hb, Pre_Platelets, 
          Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, 
          preop_ecls, intraop_ecls, las, transfusion)
 
@@ -827,7 +913,7 @@ data_use_lasso <- data_use %>%
           rbc_72_tot, ffp_72_tot, plt_72_tot, cryo_72_tot))) == 0, 0, 1
   )
   ) %>% 
-  select(Age, type, ECLS_CPB, ECLS_ECMO, cys_fib, Pre_Hb, Pre_Hct, Pre_Platelets, 
+  select(Age, type, ECLS_CPB, ECLS_ECMO, cys_fib, Pre_Hb, Pre_Platelets, 
          Pre_INR, Pre_PTT, Pre_Creatinine, redo_transplant, Hypertension, preop_ecls, intraop_ecls, transfusion)
 
 # Removing NA row from data set (complete case analysis) - only 1 missing for Pre_PTT
