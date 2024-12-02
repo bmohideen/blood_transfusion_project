@@ -2134,7 +2134,7 @@ cart_plots1 <- ggarrange(plotlist = pruned_cart_plots,
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 10. Pruned CART trees containing all available variables for repeated trials. Relevant characteristics/factors and their threshold/categories are shown for\neach of the 5 repetitions (A-E).", 
+      "Figure 9. Pruned CART trees containing all available variables for repeated trials. Relevant characteristics/factors and their threshold/categories are shown for\neach of the 5 repetitions (A-E).", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -2152,7 +2152,7 @@ cart_plots2 <- ggarrange(plotlist = pruned_cart_roc,
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 11. ROC curves for 5 repeated trials of CART containing all available variables. Performance of the classifier is shown for each of the 5 repetitions (A-E).", 
+      "Figure 10. ROC curves for 5 repeated trials of CART containing all available variables. Performance of the classifier is shown for each of the 5 repetitions (A-E).", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -2239,7 +2239,7 @@ cart_plots3 <- ggarrange(plotlist = pruned_lit_cart_plots,
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 12. Pruned CART trees containing literature-relevant variables for repeated trials. Relevant literature characteristics/factors and their threshold/categories\nare shown for each of the 5 repetitions (A-E).", 
+      "Figure 11. Pruned CART trees containing literature-relevant variables for repeated trials. Relevant literature characteristics/factors and their threshold/categories\nare shown for each of the 5 repetitions (A-E).", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -2257,7 +2257,7 @@ cart_plots4 <- ggarrange(plotlist = pruned_lit_cart_roc,
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 13. ROC curves for 5 repeated trials of CART containing literature-relevant variables. Performance of the classifier is shown for each of the 5\nrepetitions (A-E).", 
+      "Figure 12. ROC curves for 5 repeated trials of CART containing literature-relevant variables. Performance of the classifier is shown for each of the 5\nrepetitions (A-E).", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
