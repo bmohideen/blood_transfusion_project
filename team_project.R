@@ -1137,8 +1137,10 @@ q2eda_plots <- ggarrange(plotlist = q2_eda,
                              align = "hv") %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure #. Exploratory data analysis for additional variables required for surivival analysis. A) & B) bar plots of patient deaths (X-axis) counts (Y-axis) for pateints that died at any time and before 1 year, respectively. 
-      C), D), & E) histograms showing time to death (X-axis) and frequency (Y-axis) for only patients who died, patients who died or were censored at 365 days, and pateints who died before 365 days or were censored at 365 days, respectively", 
+      "Figure 13. Exploratory data analysis for additional variables required for surivival analysis. A) & B) bar plots of patient deaths (X-axis) counts (Y-axis) for 
+      pateints that died at any time and before 1 year, respectively. C), D), & E) histograms showing time to death (X-axis) and frequency (Y-axis) for only patients
+      who died, patients who died at anytime or were censored at 365 days, and pateints who died before 365 days or were censored 
+      at 365 days, respectively", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -1200,8 +1202,8 @@ q2km_plots <- ggarrange(plotlist = q2_km,
                          align = "hv") %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure #. Kaplan-Meier curves of survival estimate with the X-axis representing the time (in days) and the Y-axis showing the survival probaility beginning at 0.8. 
-      A) unstratified. B) stratified by whether or not pateints got blood transfusions.", 
+      "Figure 14. Kaplan-Meier curves of survival estimate with the X-axis representing the time (in days) and the Y-axis showing the survival probaility beginning 
+      at 0.8. A) unstratified. B) stratified by whether or not pateints got blood transfusions.", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -1233,12 +1235,6 @@ coxmod2 <- coxph(Surv(time_death, has_value==1) ~ transfusion + intraop_ecls + P
 summary(coxmod2)
 # test proportional hazard
 cox.zph(coxmod2)
-
-# JUST THE LITERATURE ONES - DELETE !!!
-coxmod3 <- coxph(Surv(time_death, has_value==1) ~ transfusion + type + Pre_Hb + intraop_ecls + Hypertension,data=sup_dwd)
-summary(coxmod3)
-# test proportional hazard
-cox.zph(coxmod3)
     
 ####################################
 #####     WILCOXON TEST   #####
@@ -1259,8 +1255,6 @@ boxplot(HOSPITAL_LOS~transfusion)
 wilcox.test(HOSPITAL_LOS~transfusion)
 
 detach(sup_dwd)
-
-##### ANYTHING FROM HERE CAN PROBABLY BE DELETED DEPENDING ON WHAT WE WANT AS SUP MATERIAL !!! #####
 
 #########################################
 ##### Secondary Survival Analysis #####
@@ -1296,8 +1290,15 @@ LR_test3
 coxmod3 <- coxph(Surv(time_death, has_value==1) ~ transfusion + gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
                  + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot, data=data_with_dead)
 summary(coxmod3)
-## SEE LIT -> HYPERTENSION AND ANEMIA !!!
-## maybe aslo add relevant predictors from the first quetsion !!!
+
+##### ANYTHING FROM HERE CAN PROBABLY BE DELETED DEPENDING ON WHAT WE WANT AS SUP MATERIAL !!! #####
+
+# JUST THE LITERATURE ONES - DELETE !!!
+coxmod3 <- coxph(Surv(time_death, has_value==1) ~ transfusion + type + Pre_Hb + intraop_ecls + Hypertension,data=sup_dwd)
+summary(coxmod3)
+# test proportional hazard
+cox.zph(coxmod3)
+
 
 ##### Stratify by if they got a transfusion #####
 ### MAIN ANALYSIS !!!
