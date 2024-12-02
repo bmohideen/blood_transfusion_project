@@ -1086,7 +1086,7 @@ data_with_dead <- data_with_dead %>%
 sup_dwd <- sup_dwd %>%
   mutate(
     time_death = if_else(is.na(time_death), 365, time_death))
-# for sup_dwd also convert anything above 365 to 365 RIGHT !!!
+# for sup_dwd also convert anything above 365 to 365 
 sup_dwd <- sup_dwd %>%
   mutate(
     time_death = if_else((time_death > 365), 365, time_death))
@@ -1215,7 +1215,7 @@ plot(survfit(Surv(time_death, has_value==1)~transfusion, data=sup_dwd), fun = "c
 # add a legend with col to distinguish levels
 legend("topleft",legend = c("Transfusion", "No Transfusion"),lty = 1, col = 1:2)
 
-# Run the log-rank test # CRYSTAL GOT A P OF 0.5 !!! a p value of 1 is the max !!!
+# Run the log-rank test 
 LR_test1 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=sup_dwd)
 LR_test1
 
@@ -1225,7 +1225,7 @@ LR_test1
 # this will be a significant limitation as there are only 23 events -> would be limited to 2 variables but that seems very small 
 ## any more may be subject to overfitting or estimates that are highly sensitive to small changes 
 
-# Run a Cox proportional hazard model including variables found to be relevant in Question 1 Lasso regression (all) - see report !!! 
+# Run a Cox proportional hazard model including variables found to be relevant in Question 1 Lasso regression (all) - see report 
 coxmod1 <- coxph(Surv(time_death, has_value==1) ~ transfusion + intraop_ecls + Pre_Hb + Pre_Platelets + redo_transplant,data=sup_dwd)
 # warning that suggest redo_transplant has too few observations in the redo category
 # therefore remove it
@@ -1234,7 +1234,7 @@ summary(coxmod2)
 # test proportional hazard
 cox.zph(coxmod2)
 
-# JUST THE LITERATURE ONES
+# JUST THE LITERATURE ONES - DELETE !!!
 coxmod3 <- coxph(Surv(time_death, has_value==1) ~ transfusion + type + Pre_Hb + intraop_ecls + Hypertension,data=sup_dwd)
 summary(coxmod3)
 # test proportional hazard
@@ -1246,20 +1246,21 @@ cox.zph(coxmod3)
 
 #See EDA that hospital LOS and ICU LOS is not normally distributed
 # therefore t test and linear regression will not suffice as the assumptions are not met
-# since we are writing a report though we could include the linear regression stuff in the appendix but if we dont want to we just have to delete it !!!
 attach(sup_dwd)
 
 # ICU stay 
-boxplot(ICU_LOS~transfusion) # this is really ugly !!!
+# look at boxplot for visual 
+boxplot(ICU_LOS~transfusion) 
 wilcox.test(ICU_LOS~transfusion)
 
 # hospital stay
-boxplot(HOSPITAL_LOS~transfusion) # this is really ugly !!!
+# look at boxplot for visual 
+boxplot(HOSPITAL_LOS~transfusion)
 wilcox.test(HOSPITAL_LOS~transfusion)
 
 detach(sup_dwd)
 
-##### ANYTHING FROM HERE CAN PROBABLY BE DELETED DEPENDING ON WHAT WE WANT AS SUP MATERIAL #####
+##### ANYTHING FROM HERE CAN PROBABLY BE DELETED DEPENDING ON WHAT WE WANT AS SUP MATERIAL !!! #####
 
 #########################################
 ##### Secondary Survival Analysis #####
@@ -1291,7 +1292,7 @@ LR_test3 <- survdiff(Surv(time_death, has_value==1) ~ transfusion, data=data_wit
 LR_test3
 
 # Run a Cox proportional hazard model including variables related to the patient (orange) and blood transfused into the patients and their 72 hour stats (yellow)
-# Should i be including like a LOT of other things !!! -> do i check for multicollinearity?
+
 coxmod3 <- coxph(Surv(time_death, has_value==1) ~ transfusion + gender_male + Age + BMI + intra_plasma + intra_packed_cells + Intra_Platelets + Intra_Cryoprecipitate
                  + rbc_72_tot + ffp_72_tot + plt_72_tot + cryo_72_tot, data=data_with_dead)
 summary(coxmod3)
@@ -1331,10 +1332,12 @@ LR_test3
 attach(data_with_dead)
     
 # ICU stay 
+# look at boxplot for visual 
 boxplot(icu_stay~transfusion) # this is really ugly !!!
 wilcox.test(icu_stay~transfusion)
     
 # hospital stay
+# look at boxplot for visual
 boxplot(HOSPITAL_LOS~transfusion) # this is really ugly !!!
 wilcox.test(HOSPITAL_LOS~transfusion)
     
