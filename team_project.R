@@ -154,11 +154,10 @@ summary(table_one, digits =2)
 baseline_summ <- data_use %>%
   select(66, 5, 67, 68, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 26, 27, 28, 29, 30, 31, 33, 24, 21) %>%
   mutate(
-    gender_male = ifelse(gender_male == TRUE, "Male", "Female"),
     across(
-      c(COPD, aat_deficiency, cys_fib, ipah, ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud,
+      c(gender_male, COPD, aat_deficiency, cys_fib, ipah, ild, pulm_other, cad, Hypertension, t1d, t2d, gerd_pud,
         renal_fail, stroke, liver_disease, thyroid_disease, preop_ecls, first_transplant),
-      ~ ifelse(. == TRUE, "Yes", "No")
+      ~ ifelse(. == 1, "Yes", "No")
     )
   ) %>%
   tbl_summary(
@@ -208,18 +207,15 @@ baseline_summ <- data_use %>%
     ) %>%
   modify_caption(caption = "**Table 1.** Baseline characteristics of lung transplant patients.")
 baseline_summ
+gt::gtsave(as_gt(baseline_summ), file = file.path(getwd(), "baseline_summ.png"))
 
 # Create summary table for operative and postoperative outcomes
 op_postop_summ <- data_use %>%
   select(23, 34, 35, 36, 37, 38, 39, 40, 43, 44, 45, 41, 47, 65) %>%
   mutate(
     across(
-      c(evlp, intraop_ecls, ECLS_ECMO, ECLS_CPB),
-      ~ ifelse(. == TRUE, "Yes", "No")
-      ),
-    across(
-      c(ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN),
-      ~ ifelse(. == "Y", "Yes", "No")
+      c(evlp, intraop_ecls, ECLS_ECMO, ECLS_CPB, ALIVE_30DAYS_YN, ALIVE_90DAYS_YN, ALIVE_12MTHS_YN),
+      ~ ifelse(. == 1, "Yes", "No")
       ),
     massive_transfusion = ifelse(massive_transfusion == 1, "Yes", "No")
   ) %>%
@@ -256,6 +252,7 @@ op_postop_summ <- data_use %>%
   ) %>%
   modify_caption(caption = "**Table 2.** Operative and Postoperative Outcomes of lung transplant patients.")
 op_postop_summ
+gt::gtsave(as_gt(op_postop_summ), file = file.path(getwd(), "op_postop_summ.png"))
 
 ###### Prepare the tables so that they look pretty for the report #####
 # Install gridExtra
@@ -2273,12 +2270,14 @@ auc_combined_df
 auc_avg_df <- auc_combined_df %>%
   group_by(Model, Vars) %>%
   summarise(
-    mean_auc <- mean(AUC)
+    mean_auc <- mean(AUC),
+    sd_auc <- sd(AUC)
     ) %>%
   ungroup() %>%
   # Rename column
   rename(
-    mean_auc = "mean_auc <- mean(AUC)"
+    mean_auc = "mean_auc <- mean(AUC)",
+    sd_auc = "sd_auc <- sd(AUC)"
   )
 
 # View the averaged AUC scores for all the models
