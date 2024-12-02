@@ -10,6 +10,7 @@ library(tree)
 library(mice)
 library(ggpubr)
 library(gridGraphics)
+library(tidyr)
 
 #########################################
 ##### Loading and Cleaning the Data #####
