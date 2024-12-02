@@ -1256,6 +1256,30 @@ wilcox.test(HOSPITAL_LOS~transfusion)
 
 detach(sup_dwd)
 
+# make a histogram for ICU LOS by transfusoin
+ggplot(sup_dwd, aes(x = ICU_LOS, fill = transfusion)) +
+  geom_histogram(alpha = 0.6, position = "identity", binwidth = 1) +
+  facet_wrap(~ transfusion) + # Separate histograms for "Yes" and "No"
+  labs(
+    title = "ICU Length of Stay by Blood Transfusion Status",
+    x = "ICU Length of Stay (days)",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("1" = "blue", "0" = "orange"))
+
+# make a histogram for Hospital LOS by transfusoin
+ggplot(sup_dwd, aes(x = HOSPITAL_LOS, fill = transfusion)) +
+  geom_histogram(alpha = 0.6, position = "identity", binwidth = 1) +
+  facet_wrap(~ transfusion) + # Separate histograms for "Yes" and "No"
+  labs(
+    title = "ICU Length of Stay by Blood Transfusion Status",
+    x = "ICU Length of Stay (days)",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("1" = "blue", "0" = "orange"))
+
 #########################################
 ##### Secondary Survival Analysis #####
 #########################################
