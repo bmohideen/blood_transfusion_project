@@ -11,6 +11,7 @@ library(mice)
 library(ggpubr)
 library(gridGraphics)
 library(tidyr)
+library(gtsummary)
 
 #########################################
 ##### Loading and Cleaning the Data #####
@@ -2047,6 +2048,310 @@ nonzero_coef_cryo_lit <- Reduce(function(x, y) full_join(x, y, by = "Feature"), 
 # Replace NAs with 0 for features not present in certain repetitions
 nonzero_coef_cryo_lit[is.na(nonzero_coef_cryo_lit)] <- 0
 nonzero_coef_cryo_lit
+
+#### Table summarizing model performance for transfusion amount ####
+# List of dataframes
+list_df_amount <- list(
+  rbc_all = lasso_performance_df_rbc,
+  ffp_all = lasso_performance_df_ffp,
+  plt_all = lasso_performance_df_plt,
+  cryo_all = lasso_performance_df_cryo,
+  rbc_lit = lasso_performance_df_rbc_lit,
+  ffp_lit = lasso_performance_df_ffp_lit,
+  plt_lit = lasso_performance_df_plt_lit,
+  cryo_lit = lasso_performance_df_cryo_lit
+)
+
+# Function to calculate mean R-squared and MSE for each dataframe
+calculate_means <- function(df, name) {
+  df %>%
+    summarise(
+      Mean_R_Squared = mean(R_Squared, na.rm = TRUE),
+      Mean_MSE = mean(MSE, na.rm = TRUE)
+    ) %>%
+    mutate(Variable_Set = name)
+}
+
+# Apply the function to each dataframe and combine results
+mean_results_amount <- bind_rows(
+  lapply(names(list_df_amount), function(name) calculate_means(list_df_amount[[name]], name))
+)
+
+# Make results into more readable format
+mean_results_amount <- mean_results_amount %>%
+  mutate(
+    Variable_Type = ifelse(grepl("_lit", Variable_Set), "Literature-Based", "All Variables"),
+    Variable = sub("_lit|_all", "", Variable_Set)
+  ) %>%
+  select(Variable, Variable_Type, Mean_R_Squared, Mean_MSE)
+print(mean_results_amount)
+
+
+#### Plots for transfusion amount #### 
+
+#### LASSO plots for all variables ####
+
+lasso_plots_rbc_all <- ggarrange(plotlist = lasso_plot_rbc,
+                                 labels = c("A", "B", "C", "D", "E"),
+                                 widths = c(1, 1, 1),
+                                 heights = c(4, 4),
+                                 ncol = 3,
+                                 nrow = 2,
+                                 align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. Lasso coefficient paths for 5 repeated trials of Lasso regression containing all available variables, with total 24 hour RBC as the response \nvariable. Variability in coefficient values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+lasso_plots_rbc_all
+ggsave("lasso_plots_rbc_all.png", lasso_plots_rbc_all, width = 12, height = 8, dpi = 300)
+
+lasso_plots_ffp_all <- ggarrange(plotlist = lasso_plot_ffp,
+                                 labels = c("A", "B", "C", "D", "E"),
+                                 widths = c(1, 1, 1),
+                                 heights = c(4, 4),
+                                 ncol = 3,
+                                 nrow = 2,
+                                 align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. Lasso coefficient paths for 5 repeated trials of Lasso regression containing all available variables, with total 24 hour FFP as the response \nvariable. Variability in coefficient values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+lasso_plots_ffp_all
+ggsave("lasso_plots_ffp_all.png", lasso_plots_ffp_all, width = 12, height = 8, dpi = 300)
+
+lasso_plots_plt_all <- ggarrange(plotlist = lasso_plot_plt,
+                                 labels = c("A", "B", "C", "D", "E"),
+                                 widths = c(1, 1, 1),
+                                 heights = c(4, 4),
+                                 ncol = 3,
+                                 nrow = 2,
+                                 align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. Lasso coefficient paths for 5 repeated trials of Lasso regression containing all available variables, with total 24 hour PLT as the response \nvariable. Variability in coefficient values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+lasso_plots_plt_all
+ggsave("lasso_plots_plt_all.png", lasso_plots_plt_all, width = 12, height = 8, dpi = 300)
+
+lasso_plots_cryo_all <- ggarrange(plotlist = lasso_plot_cryo,
+                                  labels = c("A", "B", "C", "D", "E"),
+                                  widths = c(1, 1, 1),
+                                  heights = c(4, 4),
+                                  ncol = 3,
+                                  nrow = 2,
+                                  align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. Lasso coefficient paths for 5 repeated trials of Lasso regression containing all available variables, with total 24 hour CRYO as the response \nvariable. Variability in coefficient values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+lasso_plots_cryo_all
+ggsave("lasso_plots_cryo_all.png", lasso_plots_cryo_all, width = 12, height = 8, dpi = 300)
+
+#### LASSO plots for lit variables ####   
+
+lasso_plots_rbc_all_lit <- ggarrange(plotlist = lasso_plot_rbc_lit,
+                                     labels = c("A", "B", "C", "D", "E"),
+                                     widths = c(1, 1, 1),
+                                     heights = c(4, 4),
+                                     ncol = 3,
+                                     nrow = 2,
+                                     align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. Lasso coefficient paths for 5 repeated trials of Lasso regression containing variables from literature, with total 24 hour RBC as the response \nvariable. Variability in coefficient values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+lasso_plots_rbc_all_lit
+ggsave("lasso_plots_rbc_all_lit.png", lasso_plots_rbc_all_lit, width = 12, height = 8, dpi = 300)
+
+lasso_plots_ffp_all_lit <- ggarrange(plotlist = lasso_plot_ffp_lit,
+                                     labels = c("A", "B", "C", "D", "E"),
+                                     widths = c(1, 1, 1),
+                                     heights = c(4, 4),
+                                     ncol = 3,
+                                     nrow = 2,
+                                     align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. Lasso coefficient paths for 5 repeated trials of Lasso regression containing variables from literature, with total 24 hour FFP as the response \nvariable. Variability in coefficient values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+lasso_plots_ffp_all_lit
+ggsave("lasso_plots_ffp_all_lit.png", lasso_plots_ffp_all_lit, width = 12, height = 8, dpi = 300)
+
+lasso_plots_plt_all_lit <- ggarrange(plotlist = lasso_plot_plt_lit,
+                                     labels = c("A", "B", "C", "D", "E"),
+                                     widths = c(1, 1, 1),
+                                     heights = c(4, 4),
+                                     ncol = 3,
+                                     nrow = 2,
+                                     align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. Lasso coefficient paths for 5 repeated trials of Lasso regression containing variables from literature, with total 24 hour PLT as the response \nvariable. Variability in coefficient values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+lasso_plots_plt_all_lit
+ggsave("lasso_plots_plt_all_lit.png", lasso_plots_plt_all_lit, width = 12, height = 8, dpi = 300)
+
+lasso_plots_cryo_all_lit <- ggarrange(plotlist = lasso_plot_cryo_lit,
+                                      labels = c("A", "B", "C", "D", "E"),
+                                      widths = c(1, 1, 1),
+                                      heights = c(4, 4),
+                                      ncol = 3,
+                                      nrow = 2,
+                                      align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. Lasso coefficient paths for 5 repeated trials of Lasso regression containing variables from literature, with total 24 hour CRYO as the response \nvariable. Variability in coefficient values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+lasso_plots_cryo_all_lit
+ggsave("lasso_plots_cryo_all_lit.png", lasso_plots_cryo_all_lit, width = 12, height = 8, dpi = 300)
+
+#### AUC plots for all variables ####
+
+auc_plots_rbc <- ggarrange(plotlist = r2_plot_rbc,
+                           labels = c("A", "B", "C", "D", "E"),
+                           widths = c(1, 1, 1),
+                           heights = c(1,1),
+                           ncol = 3,
+                           nrow = 2,
+                           align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. AUC for 5 repeated trials of Lasso regression containing all available variables, with total 24 hour RBC as the response \nvariable.  Change in AUC values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+auc_plots_rbc
+ggsave("auc_plots_rbc.png", auc_plots_rbc, width = 12, height = 8, dpi = 300)
+
+auc_plots_ffp <- ggarrange(plotlist = r2_plot_ffp,
+                           labels = c("A", "B", "C", "D", "E"),
+                           widths = c(1, 1, 1),
+                           heights = c(1,1),
+                           ncol = 3,
+                           nrow = 2,
+                           align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. AUC for 5 repeated trials of Lasso regression containing all available variables, with total 24 hour FFP as the response \nvariable.  Change in AUC values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+auc_plots_ffp
+ggsave("auc_plots_ffp.png", auc_plots_ffp, width = 12, height = 8, dpi = 300)
+
+auc_plots_plt <- ggarrange(plotlist = r2_plot_plt,
+                           labels = c("A", "B", "C", "D", "E"),
+                           widths = c(1, 1, 1),
+                           heights = c(1,1),
+                           ncol = 3,
+                           nrow = 2,
+                           align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. AUC for 5 repeated trials of Lasso regression containing all available variables, with total 24 hour PLT as the response \nvariable.  Change in AUC values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+auc_plots_plt
+ggsave("auc_plots_plt.png", auc_plots_plt, width = 12, height = 8, dpi = 300)
+
+auc_plots_cryo <- ggarrange(plotlist = r2_plot_cryo,
+                            labels = c("A", "B", "C", "D", "E"),
+                            widths = c(1, 1, 1),
+                            heights = c(1,1),
+                            ncol = 3,
+                            nrow = 2,
+                            align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. AUC for 5 repeated trials of Lasso regression containing all available variables, with total 24 hour CRYO as the response \nvariable.  Change in AUC values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+auc_plots_cryo
+ggsave("auc_plots_cryo.png", auc_plots_cryo, width = 12, height = 8, dpi = 300)
+
+#### AUC plots for lit variables ####
+
+auc_plots_rbc_lit <- ggarrange(plotlist = r2_plot_rbc_lit,
+                               labels = c("A", "B", "C", "D", "E"),
+                               widths = c(1, 1, 1),
+                               heights = c(1,1),
+                               ncol = 3,
+                               nrow = 2,
+                               align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. AUC for 5 repeated trials of Lasso regression containing variables from literature, with total 24 hour RBC as the response \nvariable.  Change in AUC values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+auc_plots_rbc_lit
+ggsave("auc_plots_rbc_lit.png", auc_plots_rbc_lit, width = 12, height = 8, dpi = 300)
+
+auc_plots_ffp_lit <- ggarrange(plotlist = r2_plot_ffp_lit,
+                               labels = c("A", "B", "C", "D", "E"),
+                               widths = c(1, 1, 1),
+                               heights = c(1,1),
+                               ncol = 3,
+                               nrow = 2,
+                               align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. AUC for 5 repeated trials of Lasso regression containing variables from literature, with total 24 hour FFP as the response \nvariable.  Change in AUC values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+auc_plots_ffp_lit
+ggsave("auc_plots_ffp_lit.png", auc_plots_ffp_lit, width = 12, height = 8, dpi = 300)
+
+auc_plots_plt_lit <- ggarrange(plotlist = r2_plot_plt_lit,
+                               labels = c("A", "B", "C", "D", "E"),
+                               widths = c(1, 1, 1),
+                               heights = c(1,1),
+                               ncol = 3,
+                               nrow = 2,
+                               align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. AUC for 5 repeated trials of Lasso regression containing variables from literature, with total 24 hour PLT as the response \nvariable.  Change in AUC values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+auc_plots_plt_lit
+ggsave("auc_plots_plt_lit.png", auc_plots_plt_lit, width = 12, height = 8, dpi = 300)
+
+auc_plots_cryo_lit <- ggarrange(plotlist = r2_plot_cryo_lit,
+                                labels = c("A", "B", "C", "D", "E"),
+                                widths = c(1, 1, 1),
+                                heights = c(1,1),
+                                ncol = 3,
+                                nrow = 2,
+                                align = "hv") %>%
+  annotate_figure(
+    bottom = text_grob(
+      "Supplemental Figure. AUC for 5 repeated trials of Lasso regression containing variables from literature, with total 24 hour CRYO as the response \nvariable.  Change in AUC values as log lambda changes is shown for each of the 5 repetitions (A-E).", 
+      size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
+    )
+  )
+auc_plots_cryo_lit
+ggsave("auc_plots_cryo_lit.png", auc_plots_cryo_lit, width = 12, height = 8, dpi = 300)
 
 #######################################
 #####     CART Classification     #####
