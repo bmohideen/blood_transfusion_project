@@ -1045,7 +1045,7 @@ lasso_plots_all <- ggarrange(plotlist = lasso_plot_all,
                              align = "hv") %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 4. Lasso coefficient paths for 5 repeated trials of Lasso regression containing all available variables. Variability in coefficient values as log lambda changes\nis shown for each of the 5 repetitions (A-E).", 
+      "Figure 3. Lasso coefficient paths for 5 repeated trials of Lasso regression containing all available variables. Variability in coefficient values as log lambda changes\nis shown for each of the 5 repetitions (A-E).", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -1062,7 +1062,7 @@ auc_plots_all <- ggarrange(plotlist = auc_plot_all,
                            align = "hv") %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 5. AUC for 5 repeated trials of Lasso regression containing all available variables. Change in AUC values as log lambda changes is shown for each of\nthe 5 repetitions (A-E).", 
+      "Figure 4. AUC for 5 repeated trials of Lasso regression containing all available variables. Change in AUC values as log lambda changes is shown for each of\nthe 5 repetitions (A-E).", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -1077,7 +1077,7 @@ roc_plots_all <- ggarrange(plotlist = roc_plot_all,
                            nrow = 3) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 6. ROC curves for 5 repeated trials of Lasso regression containing all available variables. Performance of the classifier is shown for each of the 5\nrepetitions (A-E).", 
+      "Figure 5. ROC curves for 5 repeated trials of Lasso regression containing all available variables. Performance of the classifier is shown for each of the 5\nrepetitions (A-E).", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -1097,7 +1097,7 @@ lasso_plots <- ggarrange(plotlist = lasso_plot,
                          align = "hv") %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 7. Lasso coefficient paths for 5 repeated trials of Lasso regression containing literature-relevant variables. Variability in coefficient values as log lambda\nchanges is shown for each of the 5 repetitions (A-E).", 
+      "Figure 6. Lasso coefficient paths for 5 repeated trials of Lasso regression containing literature-relevant variables. Variability in coefficient values as log lambda\nchanges is shown for each of the 5 repetitions (A-E).", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -1114,7 +1114,7 @@ auc_plots <- ggarrange(plotlist = auc_plot,
                        align = "hv") %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 8. AUC for 5 repeated trials of Lasso regression containing literature-relevant variables. Change in AUC values as log lambda changes is shown for each\nof the 5 repetitions (A-E).", 
+      "Figure 7. AUC for 5 repeated trials of Lasso regression containing literature-relevant variables. Change in AUC values as log lambda changes is shown for each\nof the 5 repetitions (A-E).", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -1129,7 +1129,7 @@ roc_plots <- ggarrange(plotlist = roc_plot,
                        nrow = 3) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure 9. ROC curves for 5 repeated trials of Lasso regression containing literature-relevant variables. Performance of the classifier is shown for each of the 5\nrepetitions (A-E).", 
+      "Figure 8. ROC curves for 5 repeated trials of Lasso regression containing literature-relevant variables. Performance of the classifier is shown for each of the 5\nrepetitions (A-E).", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
