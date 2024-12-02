@@ -294,6 +294,16 @@ gender_male_plot <- ggplot(data_use, aes(x = factor(gender_male))) +
     plot.title = element_blank()
   )
 
+# Type of transplant
+type_plot <- ggplot(data_use, aes(x = factor(type))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(x = "Type of Transplant", y = "Count") +
+  theme(
+    axis.title.x = element_text(size = 8),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_blank()
+  )
+
 # Alpha-1 antitrypsin deficiency
 aat_deficiency_plot <- ggplot(data_use, aes(x = factor(aat_deficiency))) +
   geom_bar(fill = "lightblue", color = "black") +
@@ -673,6 +683,7 @@ tot_24_rbc_plot <- ggplot(data_use, aes(x = tot_24_rbc)) +
 # Save all categorical plots in a list
 categorical_plots <- list(
   gender_male_plot = gender_male_plot,
+  type_plot = type_plot,
   aat_deficiency_plot = aat_deficiency_plot,
   cys_fib_plot = cys_fib_plot,
   ipah_plot = ipah_plot,
@@ -702,13 +713,12 @@ eda_plots_cat <- ggarrange(
   plotlist = categorical_plots, 
   labels = cat_labels, 
   ncol = 5, 
-  nrow = ceiling(num_con_plots / 5), 
+  nrow = ceiling(num_cat_plots / 5), 
   align = "hv" 
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure: Exploratory Data Analysis of Categorical Variables. Each subplot shows the distribution of the respective categorical 
-variable in the dataset (1 = Yes and 0 = No).", 
+      "Figure 1. Exploratory Data Analysis of Categorical Variables. Each subplot shows the distribution of the respective categorical variable in the dataset\n(1 = Yes and 0 = No).", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
   )
@@ -754,7 +764,7 @@ eda_plots_con <- ggarrange(
 ) %>%
   annotate_figure(
     bottom = text_grob(
-      "Figure: Exploratory Data Analysis of Continuous Variables. Each subplot shows the distribution of the respective continuous 
+      "Figure 2. Exploratory Data Analysis of Continuous Variables. Each subplot shows the distribution of the respective continuous 
 variable in the dataset.", 
       size = 12, hjust = 0, x = unit(5.5, "pt"), face = "italic"
     )
